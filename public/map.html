@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InfoVis Best - Map</title>
+    <!-- Leaflet stylesheet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+    <!-- Leaflet Javascript -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- D3.js -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+<!--    <script src="node_modules/d3/dist/d3.js"></script>-->
+    <!-- NoUISlider -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css" />
+<!--    <script src="node_modules/nouislider/distribute/nouislider.js"></script>-->
+<!--    <link rel="stylesheet" href="node_modules/nouislider/distribute/nouislider.css" />-->
+    <script src="map.js"></script>
+    <style>
+        #map {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 90vh;
+        }
+        #slider {
+            margin: 10px 30px 40px 30px;
+            /*width: 60vw;*/
+            /*height: 2rem;*/
+        }
+        #bornDiedButtons {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 10px 20px 0 0;
+            font-size: 1.1rem;
+            z-index: 2002;
+            /*color: #3FB8AF;*/
+            /*display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;*/
+        }
+        #bornDiedButtons * {
+            /*flex-grow: 1;
+            flex-basis: auto;
+            text-align: center;*/
+        }
+        #legende {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            margin: 0 20px 10px 0;
+            z-index: 2002;
+        }
+        .legend {
+            margin: 0 5px 0 0;
+        }
+        #rang5 {
+            padding: 0 10px 0 10px;
+            background-color: hsl(300, 100%, 50%);
+        }
+        #rang4 {
+            padding: 0 10px 0 10px;
+            background-color: hsl(340, 100%, 50%);
+        }
+        #rang3 {
+            padding: 0 10px 0 10px;
+            background-color: hsl(20, 100%, 50%);
+        }
+        #rang2 {
+            padding: 0 10px 0 10px;
+            background-color: hsl(60, 100%, 50%);
+        }
+        #rangUnbekannt {
+            padding: 0 10px 0 10px;
+            background-color: hsl(100, 100%, 50%);
+        }
+        svg#svgDefinitions {
+            width: 0;
+            height: 0;
+        }
+        circle {
+            /*fill: red;*/
+            opacity: 0.5;
+        }
+        path {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+<div id="slider"></div>
+<div id="map">
+    <div id="bornDiedButtons">
+        <label>Born
+            <input type="radio" name="bornDied" value="born">
+        </label>
+        <label>Died
+            <input type="radio" name="bornDied" value="died">
+        </label>
+        <label>Born & Died
+            <input type="radio" name="bornDied" value="both" checked>
+        </label>
+    </div>
+    <div id="legende">
+        <span id="rang5" class="legend">    </span> Rang 5<br />
+        <span id="rang4" class="legend">    </span> Rang 4<br />
+        <span id="rang3" class="legend">    </span> Rang 3<br />
+        <span id="rang2" class="legend">    </span> Rang 2<br />
+        <span id="rangUnbekannt" class="legend">    </span>Unbekannt<br />
+    </div>
+</div>
+<svg id="svgDefinitions" width="0" height="0">
+    <defs>
+        <linearGradient id="strokeGradient">
+            <stop offset="0%" stop-color="#999" />
+            <stop offset="100%" stop-color="#000" />
+        </linearGradient>
+        <linearGradient id="strokeGradientReverse">
+            <stop offset="0%" stop-color="#444" />
+            <stop offset="100%" stop-color="#DDD" />
+        </linearGradient>
+<!--        <linearGradient id="strokeGradient2" x1="688" y1="457" x2="1120" y2="198">-->
+<!--            <stop offset="0%" stop-color="#FFF" />-->
+<!--            <stop offset="100%" stop-color="#000" />-->
+<!--        </linearGradient>-->
+    </defs>
+</svg>
+</body>
+</html>

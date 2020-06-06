@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>PathGradients</title>
+</head>
+<body>
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            /*path {*/
+            /*    !*fill: none;*!*/
+            /*    stroke: url(#strokeGradientxy);*/
+            /*    !*stroke: black;*!*/
+            /*    stroke-width: 3;*/
+            /*}*/
+            circle {
+                stroke: url(#strokeGradient);
+                stroke-width: 10;
+            }
+        </style>
+        <linearGradient id="strokeGradientxy" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#86FFF6" />
+            <stop offset="100%" stop-color="#8689F6" />
+        </linearGradient>
+        <linearGradient id="strokeGradient" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#86FFF6" />
+            <stop offset="100%" stop-color="#8689F6" />
+        </linearGradient>
+        <linearGradient id="strokeGradient3">
+            <stop offset="0%" stop-color="#00bc9b"></stop>
+            <stop offset="100%" stop-color="#5eaefd"></stop>
+        </linearGradient>
+    </defs>
+    <path stroke="url(#strokeGradient3)" stroke-opacity="1" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" d="M 50 50 l 50 10"></path>
+    <path id="otherPath" d="M 100 100 l 50 0"></path>
+    <circle cx="200" cy="200" r="30"></circle>
+</svg>
+</body>
+</html>

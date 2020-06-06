@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Black Lives Matter MUC",
+    "startYear": 2020,
+    "endYear": null,
+    "places": [
+      {
+        "placeName": "München",
+        "lat": 48.1551,
+        "lon": 11.5418
+      }
+    ]
+  },
+  {
+    "name": "Kolbermoorer Räterepublik",
+    "startYear": 1919,
+    "endYear": 1919,
+    "places": [
+      {
+        "placeName": "Kolbermoor",
+        "lat": 47.8516,
+        "lon": 12.0644
+      }
+    ]
+  }
+]
