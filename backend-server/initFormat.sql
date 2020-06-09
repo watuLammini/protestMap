@@ -1,26 +1,42 @@
--- Füge neue Spalten für die richtigen Datumsangaben hinzu
-ALTER TABLE person
-    ADD COLUMN Birthdate DATE NOT NULL AFTER F13;
-ALTER TABLE person
-    ADD COLUMN Deathdate DATE NOT NULL AFTER F14;
+# Tabelle für Protestbewegungen
+CREATE TABLE IF NOT EXISTS movement (
+                          id SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                          name VARCHAR(100) NOT NULL UNIQUE,
+                          startYear SMALLINT,
+                          endYear SMALLINT
+);
 
--- Übersetze die Monate auf Englisch
-UPDATE person
-    SET F13 = REPLACE(REPLACE(REPLACE(REPLACE(F13,'Dez', 'Dec'),'Okt', 'Oct'), 'Mai', 'May'), 'Mär', 'Mar');
-UPDATE person
-    SET F14 = REPLACE(REPLACE(REPLACE(REPLACE(F14,'Dez', 'Dec'),'Okt', 'Oct'), 'Mai', 'May'), 'Mär', 'Mar');
+# Tabelle für Orte
+CREATE TABLE IF NOT EXISTS `place` (
+                         `ID` SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+                         `Name` varchar(100) NOT NULL UNIQUE,
+                         `Latitude` varchar(32) NOT NULL,
+                         `Longitude` varchar(32) NOT NULL
+);
 
--- Umwandlung des ersten Formates
-UPDATE IGNORE person
-    SET Birthdate = STR_TO_DATE(F13, '%Y~');
-UPDATE IGNORE person
-    SET Deathdate = STR_TO_DATE(F14, '%Y~');
+# Verknüpfungstabelle Protestbewegungen-Orte
+CREATE TABLE IF NOT EXISTS movementPlace (
+                               movementID SMALLINT UNSIGNED NOT NULL,
+                               placeID SMALLINT UNSIGNED NOT NULL,
+                               CONSTRAINT FK_MV_PLACES
+                                   FOREIGN KEY (movementID) REFERENCES movement (id),
+                                   FOREIGN KEY (placeID) REFERENCES place (ID),
+                                   PRIMARY KEY (movementID, placeID)
+);
 
+# Beispieldaten eingeben
+INSERT INTO place (Name, Latitude, Longitude) VALUES
+    ('München', 48.1551, 11.5418);
 
--- Umwandlung des zweiten Formates
-UPDATE IGNORE person
-    SET Birthdate =	STR_TO_DATE(F13, '%Y %b %d')
-    WHERE Birthdate = '00-00-0000';
-UPDATE IGNORE person
-    SET Deathdate =	STR_TO_DATE(F14, '%Y %b %d')
-    WHERE Deathdate = '00-00-0000';
+INSERT INTO movement (name, startYear, endYear) VALUES
+    ('Black Lives Matter MUC', 2020, Null);
+
+INSERT INTO movementPlace (movementID, placeID) VALUES
+    (1, 1);
+
+# Beispielhafter Join, um alle Protestbewegungen mit dazugehörigen Orten zu laden
+
+SELECT p.ID, p.Name, p.Latitude, p.Longitude, m.id, m.name, m.startYear, m.endYear
+FROM movementPlace mp
+         INNER JOIN place p ON mp.placeID = p.ID
+         INNER JOIN movement m ON mp.movementID = m.id

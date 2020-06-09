@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql');
 const model = require('./dbModel');
 
 // Get-Route für Tabelle Ort
-router.get('/ort', (req, res) => {
+router.get('/places', (req, res) => {
     model.getPlaces()
         .then(values => {
             res.json(values);

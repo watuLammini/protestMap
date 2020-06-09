@@ -6,7 +6,7 @@ const CONNECTION_DATA = {
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'kaiserhofinfovis',
+    database: 'protestMap',
     multipleStatements: true,
     connectionLimit: 10,
     // DEBUG
@@ -23,17 +23,8 @@ let connection;
  * R: Verbinde zur und baue die Datenbank auf
  */
 async function initDB() {
-    // Old: Use one static connection
-    // connection = await mysql.createConnection(CONNECTION_DATA);
     // New: Use a connection pool
     connection = await mysql.createPool(CONNECTION_DATA);
-    /*connection.connect(function (err) {
-        if (err) {
-            console.error('error connecting: ' + err.stack);
-            return;
-        }
-        console.log('connected as id ' + connection.threadId);
-    });*/
     // Konfiguration, damit Group By und die Datumstransformation funktioniert
     connection.query("SET sql_mode = '';");
     if (INIT_DB) {
@@ -54,27 +45,21 @@ async function initDB() {
 
 // R: Gib die Tabelle Ort formatiert zurück
 exports.getPlaces = async function () {
-    let rawResult;
     try {
-        rawResult = await connection.query('SELECT * FROM ort;');
+        let result = await connection.query('SELECT * FROM place;');
+        result = result[0]
+            // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
+            .filter(place => (place.Latitude && place.Longitude))
+            // R: Gib ein neues Array bestehend aus Koordinaten und Name des Ortes zurück
+            .map(place => {
+                place.Latitude = parseFloat(place.Latitude);
+                place.Longitude = parseFloat(place.Longitude);
+                return place;
+            });
+        return result;
     } catch (error) {
         throw error;
     }
-    // R: Gib nur die Ergebnisse zurück (erster Eintrag im Array)
-    result = rawResult[0]
-        // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
-        .filter(place => {
-            return place.B && place.L;
-        })
-        // R: Gib ein neues Array bestehend aus Koordinaten und Name des Ortes zurück
-        .map(place => {
-            return {
-                latitude: parseFloat(place.B),
-                longitude: parseFloat(place.L),
-                name: place.Ort
-            };
-        });
-    return result;
 };
 
 /**
