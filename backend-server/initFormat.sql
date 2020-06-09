@@ -31,8 +31,19 @@ INSERT INTO place (Name, Latitude, Longitude) VALUES
 INSERT INTO movement (name, startYear, endYear) VALUES
     ('Black Lives Matter MUC', 2020, Null);
 
+INSERT INTO movement SET
+    name = 'Münchner Räterpublik',
+    startYear = 1919,
+    endYear = 1919 ON DUPLICATE KEY UPDATE
+    name = 'Münchner Räterpublik',
+    startYear = 1919,
+    endYear = 1919;
+
 INSERT INTO movementPlace (movementID, placeID) VALUES
     (1, 1);
+
+INSERT INTO movementPlace (movementID, placeID) VALUES
+    (2, 1);
 
 # Beispielhafter Join, um alle Protestbewegungen mit dazugehörigen Orten zu laden
 

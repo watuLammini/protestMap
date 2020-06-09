@@ -46,7 +46,10 @@ async function initDB() {
 // R: Gib die Tabelle Ort formatiert zurück
 exports.getPlaces = async function () {
     try {
-        let result = await connection.query('SELECT * FROM place;');
+        let result = await connection.query(`SELECT p.ID as PlaceID, p.Name as PlaceName, p.Latitude, p.Longitude, m.id as MovementID, m.name as MovementName, m.startYear as StartYear, m.endYear as EndYear
+            FROM movementPlace mp
+                INNER JOIN place p ON mp.placeID = p.id
+                INNER JOIN movement m ON mp.movementID = m.id`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
             .filter(place => (place.Latitude && place.Longitude))

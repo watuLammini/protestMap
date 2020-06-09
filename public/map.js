@@ -1,128 +1,160 @@
 // @formatter:off
 // @formatter:on
-$(function (){
+$(function () {
 
 // DEBUG
 // Test-Daten
-const TEST_MOVEMENTS =
-[
-    {
-        "name": "Black Lives Matter MUC",
-        "startYear": 2020,
-        "endYear": null,
-        "places": [
+    const TEST_MOVEMENTS =
+        [
             {
-                "placeName": "München",
-                "lat": 48.1551,
-                "lon": 11.5418
-            }
-        ]
-    },
-    {
-        "name": "Kolbermoorer Räterepublik",
-        "startYear": 1919,
-        "endYear": 1919,
-        "places": [
+                "name": "Black Lives Matter MUC",
+                "startYear": 2020,
+                "endYear": null,
+                "places": [
+                    {
+                        "placeName": "München",
+                        "lat": 48.1551,
+                        "lon": 11.5418
+                    }
+                ]
+            },
             {
-                "placeName": "Kolbermoor",
-                "lat": 47.8516,
-                "lon": 12.0644
+                "name": "Kolbermoorer Räterepublik",
+                "startYear": 1919,
+                "endYear": 1919,
+                "places": [
+                    {
+                        "placeName": "Kolbermoor",
+                        "lat": 47.8516,
+                        "lon": 12.0644
+                    }
+                ]
             }
-        ]
-    }
-];
+        ];
 
 // == Konstanten ==
-const API_URL = 'http://localhost:3000/api';
+    const API_URL = 'http://localhost:3000/api';
 // Bereich der auswählbaren Jahre
-const START_YEAR = 1000;
-const END_YEAR = 1850;
+    const START_YEAR = 1000;
+    const END_YEAR = 1850;
 // Alle x Jahre gibt es Labels/pips
-const YEAR_SCALE_STEP = 100;
+    const YEAR_SCALE_STEP = 100;
 
-let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];
-let bornDied = 3;
+    let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];
+    let bornDied = 3;
 
 // R: Initialisiere die Karte mit gegebenem Mittelpunkt (München) und Zoomstufe
-const map = L.map('map').setView([48.142992, 11.573495], 7);
+    const map = L.map('map').setView([48.142992, 11.573495], 7);
 // R: Füge die OpenStreetMap tiles hinzu
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
 
 
 // map.on("moveend", () => { });
 
 // == SLIDER ==
 // Hole das container-div
-const slider = $('#slider')[0];
+    const slider = $('#slider')[0];
 // Die Beschriftung des Sliders
-let scaleValues = [];
-for (value = START_YEAR; value < END_YEAR; value += YEAR_SCALE_STEP) {
-    scaleValues.push(value);
-}
-if (scaleValues[scaleValues.length-1] !== END_YEAR) {
-    scaleValues.push(END_YEAR);
-}
-// Erstelle den Slider
-noUiSlider.create(slider, {
-    range: {
-        min: START_YEAR,
-        max: END_YEAR
-    },
-    start: [START_YEAR, END_YEAR],
-    connect: true,
-    pips: {
-        mode: 'values',
-        values: scaleValues,
-        density: 5
+    let scaleValues = [];
+    for (value = START_YEAR; value < END_YEAR; value += YEAR_SCALE_STEP) {
+        scaleValues.push(value);
     }
-});
+    if (scaleValues[scaleValues.length - 1] !== END_YEAR) {
+        scaleValues.push(END_YEAR);
+    }
+// Erstelle den Slider
+    noUiSlider.create(slider, {
+        range: {
+            min: START_YEAR,
+            max: END_YEAR
+        },
+        start: [START_YEAR, END_YEAR],
+        connect: true,
+        pips: {
+            mode: 'values',
+            values: scaleValues,
+            density: 5
+        }
+    });
 
 // Event-Listener für Änderungen der Slider-Werte
-slider.noUiSlider.on('set', values => {
-    // Formatiere die Jahreszahl als Datum
-    yearRange = values.map(value => {
-        let newValue = Math.floor(value);
-        newValue = newValue + ('-00-00');
-        return newValue;
+    slider.noUiSlider.on('set', values => {
+        // Formatiere die Jahreszahl als Datum
+        yearRange = values.map(value => {
+            let newValue = Math.floor(value);
+            newValue = newValue + ('-00-00');
+            return newValue;
+        });
+        getPersonPlaces(API_URL, yearRange[0], yearRange[1], bornDied);
+        // DEBUG
+        // console.log('YearRange: %o', yearRange);
     });
-    getPersonPlaces(API_URL, yearRange[0], yearRange[1], bornDied);
-    // DEBUG
-    // console.log('YearRange: %o', yearRange);
-});
 
 
-/**
- * (Test) Funktion, die Orte aus der Tabelle "ort" holt und sie dann an @link showPlaces übergibt
- * @param apiUrl Basis-URL zur Api (ohne "/ort")
- */
-function getPlaces(apiUrl) {
-
-}
-
-/**
- * Zeigt die Bewegungen mit Markern auf der Karte an
- * @param movements
- */
-function showPlaces(movements) {
-    let markers = new Map();
-    let markersGroup = L.featureGroup();
-    for (let movement of movements) {
-        let {name: movementName, startYear, endYear, places} = movement;
-        for (let place of places){
-            let marker = L.marker([place.lat, place.lon],
-                {title: place.placeName});
-            let popup = L.popup().setContent(movementName);
-            marker.bindPopup(popup);
-            markers.set(place.placeName, marker);
-            markersGroup.addLayer(marker);
-        }
+    /**
+     * (Test) Funktion, die Orte aus der Tabelle "ort" holt und sie dann an @link showPlaces übergibt
+     * @param apiUrl Basis-URL zur Api (ohne "/ort")
+     */
+    async function getPlaces(apiUrl) {
+        let rawResult = await fetch(`${apiUrl}/places`, {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        rawResult = await rawResult.json();
+        console.log('rawResult before: %o', rawResult);
+        rawResult = rawResult
+            .reduce((acc, place) => {
+                let lastEntry = acc[acc.length - 1];
+                let movement = {
+                    MovementID: place.MovementID,
+                    MovementName: place.MovementName,
+                    StartYear: place.StartYear,
+                    EndYear: place.EndYear
+                };
+                if (lastEntry) {
+                    if (place.PlaceName === lastEntry.PlaceName) {
+                        lastEntry.Movements.push(movement);
+                    }
+                } else {
+                    acc.push({
+                        PlaceID: place.PlaceID,
+                        PlaceName: place.PlaceName,
+                        Latitude: place.Latitude,
+                        Longitude: place.Longitude,
+                        Movements: [movement]
+                    });
+                }
+                return acc;
+            }, []);
+        console.log('rawResult after: %o', rawResult);
     }
-    markersGroup.addTo(map);
-}
+
+    /**
+     * Zeigt die Bewegungen mit Markern auf der Karte an
+     * @param movements
+     */
+    function showPlaces(movements) {
+        let markers = new Map();
+        let markersGroup = L.featureGroup();
+        for (let movement of movements) {
+            let {name: movementName, startYear, endYear, places} = movement;
+            for (let place of places) {
+                let marker = L.marker([place.lat, place.lon],
+                    {title: place.placeName});
+                let popup = L.popup().setContent(movementName);
+                marker.bindPopup(popup);
+                markers.set(place.placeName, marker);
+                markersGroup.addLayer(marker);
+            }
+        }
+        markersGroup.addTo(map);
+    }
 
 // DEBUG
-showPlaces(TEST_MOVEMENTS);
+    showPlaces(TEST_MOVEMENTS);
+    getPlaces(API_URL);
 // Ende document ready function
 });
