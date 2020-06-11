@@ -43,6 +43,11 @@ $(function () {
     let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];
     let bornDied = 3;
 
+    /**
+     * Speichert alle Marker mit Namen des Ortes als Key
+     * @type {Map<String, Object>}
+     */
+    let markers = new Map();
 // R: Initialisiere die Karte mit gegebenem Mittelpunkt (München) und Zoomstufe
     const map = L.map('map').setView([48.142992, 11.573495], 7);
 // R: Füge die OpenStreetMap tiles hinzu
@@ -94,7 +99,7 @@ $(function () {
 
 
     /**
-     * (Test) Funktion, die Orte aus der Tabelle "ort" holt und sie dann an @link showPlaces übergibt
+     * Funktion, die Orte aus der Tabelle "ort" holt und sie dann an @link showPlaces übergibt
      * @param apiUrl Basis-URL zur Api (ohne "/ort")
      */
     async function getPlaces(apiUrl) {
@@ -109,52 +114,76 @@ $(function () {
             .reduce((acc, place) => {
                 let lastEntry = acc[acc.length - 1];
                 let movement = {
-                    MovementID: place.MovementID,
-                    MovementName: place.MovementName,
-                    StartYear: place.StartYear,
-                    EndYear: place.EndYear
+                    movementID: place.movementID,
+                    movementName: place.movementName,
+                    startYear: place.startYear,
+                    endYear: place.endYear
                 };
                 if (lastEntry) {
-                    if (place.PlaceName === lastEntry.PlaceName) {
-                        lastEntry.Movements.push(movement);
+                    if (place.placeName === lastEntry.placeName) {
+                        lastEntry.movements.push(movement);
+                    }
+                    else {
+                        pushPlace(acc);
                     }
                 } else {
+                    pushPlace(acc);
+                }
+
+                function pushPlace(acc) {
                     acc.push({
-                        PlaceID: place.PlaceID,
-                        PlaceName: place.PlaceName,
-                        Latitude: place.Latitude,
-                        Longitude: place.Longitude,
-                        Movements: [movement]
+                        placeID: place.placeID,
+                        placeName: place.placeName,
+                        latitude: place.latitude,
+                        longitude: place.longitude,
+                        movements: [movement]
                     });
                 }
                 return acc;
             }, []);
         console.log('rawResult after: %o', rawResult);
+        showPlaces(rawResult);
+        addMovements(rawResult);
     }
 
     /**
      * Zeigt die Bewegungen mit Markern auf der Karte an
-     * @param movements
+     * @param places
      */
-    function showPlaces(movements) {
-        let markers = new Map();
+    function showPlaces(places) {
         let markersGroup = L.featureGroup();
-        for (let movement of movements) {
-            let {name: movementName, startYear, endYear, places} = movement;
+        for (let place of places) {
+            let {placeName, latitude, longitude} = place;
             for (let place of places) {
-                let marker = L.marker([place.lat, place.lon],
-                    {title: place.placeName});
-                let popup = L.popup().setContent(movementName);
-                marker.bindPopup(popup);
-                markers.set(place.placeName, marker);
+                let marker = L.marker([latitude, longitude],
+                    {title: placeName});
+                markers.set(placeName, marker);
                 markersGroup.addLayer(marker);
             }
         }
         markersGroup.addTo(map);
     }
 
+    async function addMovements(places) {
+        for (let place of places) {
+            let {placeName, movements} = place;
+            if (movements) {
+                let marker = markers.get(placeName);
+                let popup = L.popup();
+                for (let movement of movements) {
+                    let {startYear, endYear, movementName} = movement;
+                    // Es wäre so schön, hier den nullish coalescing operator nutzen zu können :-(
+                    endYear = endYear || 'heute';
+                    let popupContent = popup.getContent() || '';
+                    popup.setContent(`${popupContent}${movementName}; aktiv von ${startYear} bis ${endYear}<br>`);
+                    marker.bindPopup(popup);
+                    markers.set(placeName, marker);
+                }
+            }
+        }
+    }
+
 // DEBUG
-    showPlaces(TEST_MOVEMENTS);
-    getPlaces(API_URL);
+getPlaces(API_URL);
 // Ende document ready function
 });

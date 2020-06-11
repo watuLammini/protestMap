@@ -46,17 +46,17 @@ async function initDB() {
 // R: Gib die Tabelle Ort formatiert zurück
 exports.getPlaces = async function () {
     try {
-        let result = await connection.query(`SELECT p.ID as PlaceID, p.Name as PlaceName, p.Latitude, p.Longitude, m.id as MovementID, m.name as MovementName, m.startYear as StartYear, m.endYear as EndYear
+        let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.startYear as startYear, m.endYear as endYear
             FROM movementPlace mp
                 INNER JOIN place p ON mp.placeID = p.id
                 INNER JOIN movement m ON mp.movementID = m.id`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
-            .filter(place => (place.Latitude && place.Longitude))
+            .filter(place => (place.latitude && place.longitude))
             // R: Gib ein neues Array bestehend aus Koordinaten und Name des Ortes zurück
             .map(place => {
-                place.Latitude = parseFloat(place.Latitude);
-                place.Longitude = parseFloat(place.Longitude);
+                place.latitude = parseFloat(place.latitude);
+                place.longitude = parseFloat(place.longitude);
                 return place;
             });
         return result;
