@@ -2,46 +2,15 @@
 // @formatter:on
 $(function () {
 
-// DEBUG
-// Test-Daten
-    const TEST_MOVEMENTS =
-        [
-            {
-                "name": "Black Lives Matter MUC",
-                "startYear": 2020,
-                "endYear": null,
-                "places": [
-                    {
-                        "placeName": "München",
-                        "lat": 48.1551,
-                        "lon": 11.5418
-                    }
-                ]
-            },
-            {
-                "name": "Kolbermoorer Räterepublik",
-                "startYear": 1919,
-                "endYear": 1919,
-                "places": [
-                    {
-                        "placeName": "Kolbermoor",
-                        "lat": 47.8516,
-                        "lon": 12.0644
-                    }
-                ]
-            }
-        ];
-
 // == Konstanten ==
     const API_URL = 'http://localhost:3000/api';
-// Bereich der auswählbaren Jahre
+/*// Bereich der auswählbaren Jahre
     const START_YEAR = 1000;
     const END_YEAR = 1850;
 // Alle x Jahre gibt es Labels/pips
     const YEAR_SCALE_STEP = 100;
 
-    let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];
-    let bornDied = 3;
+    let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];*/
 
     /**
      * Speichert alle Marker mit Namen des Ortes als Key
@@ -55,9 +24,10 @@ $(function () {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-
+// Update der Karte bei Bewegung, momentan nicht nötig
 // map.on("moveend", () => { });
 
+/*
 // == SLIDER ==
 // Hole das container-div
     const slider = $('#slider')[0];
@@ -96,21 +66,25 @@ $(function () {
         // DEBUG
         // console.log('YearRange: %o', yearRange);
     });
-
+*/
 
     /**
-     * Funktion, die Orte aus der Tabelle "ort" holt und sie dann an @link showPlaces übergibt
+     * Funktion, die die Orte aus der Tabelle "ort" holt, die Daten fein umstrukturiert und sie dann an @link showPlaces übergibt
      * @param apiUrl Basis-URL zur Api (ohne "/ort")
      */
     async function getPlaces(apiUrl) {
-        let rawResult = await fetch(`${apiUrl}/places`, {
+        // GET-Abrfage an die API
+        let result = await fetch(`${apiUrl}/places`, {
             headers: {
                 'Content-Type': 'application/json'
             },
         });
-        rawResult = await rawResult.json();
-        console.log('rawResult before: %o', rawResult);
-        rawResult = rawResult
+        // Extraktion des Bodys in JSON
+        result = await result.json();
+        // DEBUG
+        console.log('result before: %o', result);
+        // Extraktion und Umformattierung
+        result = result
             .reduce((acc, place) => {
                 let lastEntry = acc[acc.length - 1];
                 let movement = {
@@ -119,10 +93,14 @@ $(function () {
                     startYear: place.startYear,
                     endYear: place.endYear
                 };
+                // Gibt es überhaupt schon einen Eintrag?
                 if (lastEntry) {
+                    // Wenn der letzte Eintrag gleich ist (also die aktuelle Stadt schon im neuen Result acc existiert),
+                    // dann füge ihm das aktuelle movement hinzu
                     if (place.placeName === lastEntry.placeName) {
                         lastEntry.movements.push(movement);
                     }
+                    // Ansonsten füge den Ort neu hinzu
                     else {
                         pushPlace(acc);
                     }
@@ -130,6 +108,7 @@ $(function () {
                     pushPlace(acc);
                 }
 
+                // Konstruiert einen neuen Ort und fügt ihn acc hinzu
                 function pushPlace(acc) {
                     acc.push({
                         placeID: place.placeID,
@@ -141,9 +120,10 @@ $(function () {
                 }
                 return acc;
             }, []);
-        console.log('rawResult after: %o', rawResult);
-        showPlaces(rawResult);
-        addMovements(rawResult);
+        // DEBUG
+        console.log('result after: %o', result);
+        showPlaces(result);
+        addMovements(result);
     }
 
     /**
@@ -152,15 +132,22 @@ $(function () {
      */
     function showPlaces(places) {
         let markersGroup = L.featureGroup();
+        // Icon mit eigenem Sprite
+        let protestIcon = L.icon({
+            iconUrl: './assets/feuer.svg',
+            iconSize:     [32, 32], // size of the icon
+            // iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+            // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+        });
         for (let place of places) {
             let {placeName, latitude, longitude} = place;
-            for (let place of places) {
-                let marker = L.marker([latitude, longitude],
-                    {title: placeName});
-                markers.set(placeName, marker);
-                markersGroup.addLayer(marker);
+            let marker = L.marker([latitude, longitude],
+                {title: placeName,
+                icon: protestIcon});
+            // Speichere den Marker in der Map
+            markers.set(placeName, marker);
+            markersGroup.addLayer(marker);
             }
-        }
         markersGroup.addTo(map);
     }
 
@@ -168,15 +155,18 @@ $(function () {
         for (let place of places) {
             let {placeName, movements} = place;
             if (movements) {
+                // Hol den Marker des aktuellen Ortes aus der Map
                 let marker = markers.get(placeName);
                 let popup = L.popup();
                 for (let movement of movements) {
                     let {startYear, endYear, movementName} = movement;
-                    // Es wäre so schön, hier den nullish coalescing operator nutzen zu können :-(
+                    // Es wäre so schön, hier den nullish coalescing operator nutzen zu können :-(.
+                    // Wenn endYear nicht gesestzt ist, setze es auf 'heute'
                     endYear = endYear || 'heute';
                     let popupContent = popup.getContent() || '';
                     popup.setContent(`${popupContent}${movementName}; aktiv von ${startYear} bis ${endYear}<br>`);
                     marker.bindPopup(popup);
+                    // Aktualisiere den marker im Set
                     markers.set(placeName, marker);
                 }
             }
