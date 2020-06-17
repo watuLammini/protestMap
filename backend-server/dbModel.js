@@ -1,6 +1,11 @@
 const mysql = require('mysql2/promise');
 const fs = require('fs');
 const path = require('path');
+const Ajv = require('ajv');
+const placesSchema = require('./placesSchema');
+const placesInputSchema = require('./placesInputSchema');
+
+let ajv = new Ajv( {allErrors: true} );
 
 const CONNECTION_DATA = {
     host: 'localhost',
@@ -36,6 +41,15 @@ async function initDB() {
             throw error;
         }
     }
+
+    // DEBUG
+    testValidate(placesSchema, [
+        {
+            placeID: 1,
+            placeName: "München"
+        }
+    ]);
+    insert();
 }
 
 // R: Führe die initDB in anonymer, globaler Funktion aus
@@ -46,10 +60,11 @@ async function initDB() {
 // R: Gib die Tabelle Ort formatiert zurück
 exports.getPlaces = async function () {
     try {
-        let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.startYear as startYear, m.endYear as endYear
+        let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.description as description, m.links as links, m.startYear as startYear, m.endYear as endYear
             FROM movementPlace mp
                 INNER JOIN place p ON mp.placeID = p.id
-                INNER JOIN movement m ON mp.movementID = m.id`);
+                INNER JOIN movement m ON mp.movementID = m.id
+                ORDER BY placeName DESC;`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
             .filter(place => (place.latitude && place.longitude))
@@ -65,182 +80,53 @@ exports.getPlaces = async function () {
     }
 };
 
-/**
- * Gibt ein JSON zurück, welches alle Orte enthält, an denen mindestens eine Person geboren oder gestorben ist.
- * Format:
- * {
- *     Ort: {
- *         Lat: ...
- *         Long: ...
- *         Born: [
- *             {
- *                 Died: [
- *                     Name: Aachen,
- *                     Lat: ...,
- *                     Lon: ...
- *                 ]
- *                 ID: ...,
- *                 Name: ...,
- *                 Date: ...,
- *             }
- *         ],
- *         DiedWhere: {
- *             Ort: {
- *                 Lat: ...,
- *                 Lon: ...,
- *                 Persons: []
- *             }
- *         }
- *         Died: [
- *              {
- *                  ID: ...,
- *                  Name: ...,
- *                  Date: ...
- *              }
- *         ]
- *     }
- * }
- */
-exports.getBirthDeathPlaces = async function (fromYear, toYear, birthsOrDeaths) {
-    let birthDeathPlaces;
-    try {
-        if (fromYear && toYear) {
-            // Je nachdem, ob Geburten, Tode oder beides ausgewählt wurde, werden auch nur die entsprechenden Datumsangaben berücksichtigt
-            switch (birthsOrDeaths) {
-                case 'born':
-                    birthDeathPlaces = await connection.query("SELECT P.F41 AS Id, P.ZLabel AS Name, P.F13 AS Birthdate, P.F14 AS Deathdate, " +
-                        "O.Ort AS Birthplace, O.B AS BirthLat, O.L AS BirthLon, O2.Ort as Deathplace, O2.B AS DeathLat, O2.L AS DeathLon, " +
-                        "A.Hofamt as Position, A.Rang as Hierarchy " +
-                        "FROM person AS P JOIN ort AS O ON P.F15 = O.Ort " +
-                        "JOIN ort AS O2 ON P.F17 = O2.Ort " +
-                        "LEFT JOIN transkriptionen AS T ON P.F41 = T.F41 " +
-                        "LEFT JOIN amt AS A ON T.Amt = A.Amt " +
-                        "WHERE O.B <> '' AND O2.B <> '' " +
-                        "AND P.Birthdate >= ? AND P.Birthdate <= ? " +
-                        "GROUP BY P.F41;", [fromYear, toYear]);
-                    break;
-                case 'died':
-                    birthDeathPlaces = await connection.query("SELECT P.F41 AS Id, P.ZLabel AS Name, P.F13 AS Birthdate, P.F14 AS Deathdate, " +
-                        "O.Ort AS Birthplace, O.B AS BirthLat, O.L AS BirthLon, O2.Ort as Deathplace, O2.B AS DeathLat, O2.L AS DeathLon, " +
-                        "A.Hofamt as Position, A.Rang as Hierarchy " +
-                        "FROM person AS P JOIN ort AS O ON P.F15 = O.Ort " +
-                        "JOIN ort AS O2 ON P.F17 = O2.Ort " +
-                        "LEFT JOIN transkriptionen AS T ON P.F41 = T.F41 " +
-                        "LEFT JOIN amt AS A ON T.Amt = A.Amt " +
-                        "WHERE O.B <> '' AND O2.B <> '' " +
-                        "AND P.Deathdate >= ? AND P.Deathdate <= ? " +
-                        "GROUP BY P.F41;", [fromYear, toYear]);
-                    break;
-                default:
-                    birthDeathPlaces = await connection.query("SELECT P.F41 AS Id, P.ZLabel AS Name, P.F13 AS Birthdate, P.F14 AS Deathdate, " +
-                        "O.Ort AS Birthplace, O.B AS BirthLat, O.L AS BirthLon, O2.Ort as Deathplace, O2.B AS DeathLat, O2.L AS DeathLon, " +
-                        "A.Hofamt as Position, A.Rang as Hierarchy " +
-                        "FROM person AS P JOIN ort AS O ON P.F15 = O.Ort " +
-                        "JOIN ort AS O2 ON P.F17 = O2.Ort " +
-                        "LEFT JOIN transkriptionen AS T ON P.F41 = T.F41 " +
-                        "LEFT JOIN amt AS A ON T.Amt = A.Amt " +
-                        "WHERE O.B <> '' AND O2.B <> '' " +
-                        "AND ((P.Birthdate >= ? AND P.Birthdate <= ?) " +
-                        "OR (P.Deathdate >= ? AND P.Deathdate <= ?)) " +
-                        "GROUP BY P.F41;", [fromYear, toYear, fromYear, toYear]);
+async function insert(data) {
+    // DEBUG
+    data = [ {
+        movementName: "noPAG",
+        startYear: 2018,
+        placeName: "München",
+        latitude: 48.1551,
+        longitude: 11.5418
+    } ];
+    let validationResult = testValidate(placesInputSchema, data);
+    if (validationResult) {
+        for (let movement of data){
+            let movementSet = {
+                name: movement.movementName,
+                description: movement.description,
+                links: movement.links,
+                startYear: movement.startYear,
+                endYear: movement.endYear
+            };
+            let placeSet = {
+                name: movement.placeName,
+                latitude: movement.latitude,
+                longitude: movement.longitude
+            };
+            try {
+                let resultM = await connection.query('INSERT INTO movement SET ? ' +
+                    'ON DUPLICATE KEY UPDATE ? ;', [movementSet, movementSet]);
+                let resultP = await connection.query('INSERT INTO place SET ? ' +
+                    'ON DUPLICATE KEY UPDATE ? ;', [placeSet, placeSet]);
+                let resultMP = await connection.query('INSERT INTO movementPlace SET ' +
+                    'movementID = (SELECT id FROM movement WHERE name = ?), ' +
+                    'placeID = (SELECT id FROM place WHERE name = ?) ' +
+                    'ON DUPLICATE KEY UPDATE ' +
+                    'movementID = (SELECT id FROM movement WHERE name = ?), ' +
+                    'placeID = (SELECT id FROM place WHERE name = ?) ', [movementSet.name, placeSet.name, movementSet.name, placeSet.name]);
             }
-        } else {
-            // R: Gib im Moment nur Orte zurück, die Koordinaten besitzen
-            birthDeathPlaces = await connection.query("SELECT P.F41 AS Id, P.ZLabel AS Name, P.F13 AS Birthdate, P.F14 AS Deathdate, " +
-                "O.Ort AS Birthplace, O.B AS BirthLat, O.L AS BirthLon, O2.Ort as Deathplace, O2.B AS DeathLat, O2.L AS DeathLon, " +
-                "A.Hofamt as Position, A.Rang as Hierarchy " +
-                "FROM person AS P JOIN ort AS O ON P.F15 = O.Ort " +
-                "JOIN ort AS O2 ON P.F17 = O2.Ort " +
-                "LEFT JOIN transkriptionen AS T ON P.F41 = T.F41 " +
-                "LEFT JOIN amt AS A ON T.Amt = A.Amt " +
-                "WHERE O.B <> '' AND O2.B <> '' " +
-                "GROUP BY P.F41;");
-        }
-    }
-    catch (error) {
-        throw error;
-    }
-
-    result = {};
-    // Für jeden Eintrag
-    for (let row of birthDeathPlaces[0]) {
-        // Person mit Geburtsdatum
-        let birthPerson = createPerson(row.Id, row.Name, row.Birthdate, row.Position, row.Hierarchy);
-        // Person mit Todesdatum
-        let deathPerson = createPerson(row.Id, row.Name, row.Deathdate, row.Position, row.Hierarchy);
-        // Existiert der Geburtsort schon?
-        if (result[row.Birthplace]) {
-            // Gibt es schon einen Eintrag im Array Born?
-            if (result[row.Birthplace]['Born']) {
-                // Gibt es darin schon ein Died-Array?
-                result[row.Birthplace]['Born'].push(birthPerson);
-            } else {
-                result[row.Birthplace]['Born'] = [ birthPerson ];
-            }
-            // Gibt es das DiedWhere-Objekt schon?
-            if (!result[row.Birthplace]["DiedWhere"]) {
-                result[row.Birthplace]["DiedWhere"] = {};
-            }
-            // Gibt es schon einen Sterbeort in dem (Geburts)Ort?
-            if (result[row.Birthplace]["DiedWhere"][row.Deathplace]) {
-                result[row.Birthplace]["DiedWhere"][row.Deathplace]["Persons"].push(deathPerson);
-            }
-            // Sterbeort im (Geburts)Ort muss noch angelegt werden
-            else {
-                result[row.Birthplace]["DiedWhere"][row.Deathplace] = {
-                    Lat: parseFloat(row.DeathLat),
-                    Lon: parseFloat(row.DeathLon),
-                    Persons: [ deathPerson ]
-                }
-            }
-        }
-
-        // Noch kein Eintrag für den Geburtsort
-        else {
-            result[row.Birthplace] = {
-                Lat: parseFloat(row.BirthLat),
-                Lon: parseFloat(row.BirthLon),
-                Born: [ birthPerson ],
-                DiedWhere: {
-                    [row.Deathplace]: {
-                        Lat: parseFloat(row.DeathLat),
-                        Lon: parseFloat(row.DeathLon),
-                        Persons: [ deathPerson ]
-                    }
-                }
-            }
-        }   // Ende Geburtsteil
-
-        // Gibt es den Sterbeort schon?
-        if (result[row.Deathplace]) {
-            // Gibt es das Died-Array schon?
-            if (result[row.Deathplace]['Died']) {
-                result[row.Deathplace]['Died'].push( deathPerson );
-            } else {
-                result[row.Deathplace]['Died'] = [ deathPerson ];
-            }
-        }
-        // Sterbeort existiert noch nicht
-        else {
-            result[row.Deathplace] = {
-                Lat: parseFloat(row.DeathLat),
-                Lon: parseFloat(row.DeathLon),
-                Died: [ deathPerson ]
+            catch (error) {
+                throw error;
             }
         }
     }
-    return result;
-};
+}
 
-/**
- * Erstellt ein Personen-Objekt für andre Funktionen bzw. den Client
- */
-function createPerson(iD, name, date, position, rank) {
-    return {
-        ID: iD,
-        Name: name,
-        Date: date,
-        Position: position,
-        Rank: rank
-    };
+function testValidate(schema, data) {
+    let validation = ajv.validate(schema, data);
+    if (!validation) {
+        console.log(ajv.errors);
+    }
+    return validation;
 }

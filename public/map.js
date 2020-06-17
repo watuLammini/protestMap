@@ -1,5 +1,6 @@
 // @formatter:off
 // @formatter:on
+
 $(function () {
 
 // == Konstanten ==
@@ -90,6 +91,8 @@ $(function () {
                 let movement = {
                     movementID: place.movementID,
                     movementName: place.movementName,
+                    description: place.description,
+                    links: place.links,
                     startYear: place.startYear,
                     endYear: place.endYear
                 };
@@ -157,23 +160,35 @@ $(function () {
             if (movements) {
                 // Hol den Marker des aktuellen Ortes aus der Map
                 let marker = markers.get(placeName);
-                let popup = L.popup();
+                let popup = L.popup({
+                    maxWidth: 500
+                });
                 for (let movement of movements) {
-                    let {startYear, endYear, movementName} = movement;
+                    let {movementName, description, links, startYear, endYear} = movement;
                     // Es wäre so schön, hier den nullish coalescing operator nutzen zu können :-(.
                     // Wenn endYear nicht gesestzt ist, setze es auf 'heute'
                     endYear = endYear || 'heute';
-                    let popupContent = popup.getContent() || '';
-                    popup.setContent(`${popupContent}${movementName}; aktiv von ${startYear} bis ${endYear}<br>`);
-                    marker.bindPopup(popup);
-                    // Aktualisiere den marker im Set
-                    markers.set(placeName, marker);
+                    let oldPopupContent = popup.getContent() || '';
+                    let popupContent = `${oldPopupContent}<strong>${movementName}</strong><br>`;
+                    if (startYear)
+                        popupContent += `<em>Aktiv von ${startYear} bis ${endYear}</em><br>`;
+                    if (description)
+                        popupContent += `${description}<br>`;
+                    if (links)
+                        popupContent += `${links}<br>`;
+                    popupContent += '<br>';
+                    popup.setContent(popupContent);
                 }
+                marker.bindPopup(popup);
+                // Aktualisiere den marker im Set
+                markers.set(placeName, marker);
             }
         }
     }
 
 // DEBUG
 getPlaces(API_URL);
+
+
 // Ende document ready function
 });

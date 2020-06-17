@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "http://localhost:3000/placesSchema.json",
+  "title": "Places including protest movements",
+  "description": "A Array of places including several international protest movements",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "placeID": {
+        "type": "number"
+      },
+      "placeName": {
+        "type": "string"
+      }
+    },
+    "required": ["placeID", "placeName"]
+  }
+}

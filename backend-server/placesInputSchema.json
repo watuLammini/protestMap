@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "$id": "http://localhost:3000/placesInputSchema.json",
+  "title": "Protest movements with a place",
+  "description": "Protest movements with a place",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "movementName": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "links": {
+        "type": "string"
+      },
+      "startYear": {
+        "type": "number"
+      },
+      "endYear": {
+        "type": "number"
+      },
+      "placeName": {
+        "type": "string"
+      },
+      "latitude": {
+        "type": "number"
+      },
+      "longitude": {
+        "type": "number"
+      }
+    },
+    "required": ["movementName", "placeName", "latitude", "longitude"]
+  }
+}

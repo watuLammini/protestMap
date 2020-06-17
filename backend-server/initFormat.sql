@@ -2,6 +2,8 @@
 CREATE TABLE IF NOT EXISTS movement (
                           id SMALLINT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
                           name VARCHAR(100) NOT NULL UNIQUE,
+                          description VARCHAR(10000),
+                          links VARCHAR(2048),
                           startYear SMALLINT,
                           endYear SMALLINT
 );
@@ -31,8 +33,8 @@ INSERT INTO place (name, latitude, longitude) VALUES
 INSERT INTO place (name, latitude, longitude) VALUES
     ('Kolbermoor', 47.8516, 12.0644);
 
-INSERT INTO movement (name, startYear, endYear) VALUES
-    ('Black Lives Matter MUC', 2020, Null);
+INSERT INTO movement (name) VALUES
+    ('Black Lives Matter MUC');
 
 INSERT INTO movement SET
     name = 'Münchner Räterpublik',
@@ -44,12 +46,16 @@ INSERT INTO movement SET
 
 INSERT INTO movement SET
     name = 'Kolbermoorer Räterpublik',
-     startYear = 1919,
-     endYear = 1919 ON DUPLICATE KEY UPDATE
-     name = 'Kolbermoorer Räterpublik',
-     startYear = 1919,
-     endYear = 1919;
-
+    startYear = 1919,
+    endYear = 1919,
+    description = 'Die "Räterepublik Baiern" markiert die letzte Phase der Revolution 1918/1919 und den Versuch, in Bayern ein neues Gemeinwesen zu etablieren: Hauptziele waren die Machtübernahme durch die Arbeiterparteien, der Anschluss an die Weltrevolution sowie die Vergesellschaftung der Wirtschaft. Im April 1919 gelang es Linkssozialisten und Kommunisten mit diesem Programm, die gewählte Staatsregierung aus München und Teilen Südbayerns zu verdrängen und sich dort für wenige Tage oder Wochen als faktische Inhaber der öffentlichen Gewalt zu behaupten. Die Räteherrschaft setzte sich also nicht landesweit, sondern nur in einigen urbanen und industriellen Zentren kurz durch. In München und Rosenheim zerfällt die Zeit außerdem in eine sozialistische und eine radikalere kommunistische Phase, die schließlich in die "Diktatur der Roten Armee" mündete. Die nach Bamberg ausgewichene Staatsregierung konnte ihre Autorität schließlich nur unter Zuhilfenahme von Reichstruppen und Freikorps im ganzen Land wiederherstellen und die Rote Armee der Räterepublik Ende April 1919 in einem kurzen Bürgerkrieg militärisch besiegen.',
+    links = 'https://www.historisches-lexikon-bayerns.de/Lexikon/Räterepublik_Baiern_(1919)'
+    ON DUPLICATE KEY UPDATE
+    name = 'Kolbermoorer Räterpublik',
+    startYear = 1919,
+    endYear = 1919,
+    description = 'Die "Räterepublik Baiern" markiert die letzte Phase der Revolution 1918/1919 und den Versuch, in Bayern ein neues Gemeinwesen zu etablieren: Hauptziele waren die Machtübernahme durch die Arbeiterparteien, der Anschluss an die Weltrevolution sowie die Vergesellschaftung der Wirtschaft. Im April 1919 gelang es Linkssozialisten und Kommunisten mit diesem Programm, die gewählte Staatsregierung aus München und Teilen Südbayerns zu verdrängen und sich dort für wenige Tage oder Wochen als faktische Inhaber der öffentlichen Gewalt zu behaupten. Die Räteherrschaft setzte sich also nicht landesweit, sondern nur in einigen urbanen und industriellen Zentren kurz durch. In München und Rosenheim zerfällt die Zeit außerdem in eine sozialistische und eine radikalere kommunistische Phase, die schließlich in die "Diktatur der Roten Armee" mündete. Die nach Bamberg ausgewichene Staatsregierung konnte ihre Autorität schließlich nur unter Zuhilfenahme von Reichstruppen und Freikorps im ganzen Land wiederherstellen und die Rote Armee der Räterepublik Ende April 1919 in einem kurzen Bürgerkrieg militärisch besiegen.',
+    links = 'https://www.historisches-lexikon-bayerns.de/Lexikon/Räterepublik_Baiern_(1919)';
 
 INSERT INTO movementPlace (movementID, placeID) VALUES
     (1, 1);
