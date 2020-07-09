@@ -19,7 +19,7 @@ $(function () {
      */
     let markers = new Map();
 // R: Initialisiere die Karte mit gegebenem Mittelpunkt (München) und Zoomstufe
-    const map = L.map('map').setView([48.142992, 11.573495], 7);
+    const map = L.map('map').setView([48.142992, 11.573495], 5);
 // R: Füge die OpenStreetMap tiles hinzu
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -70,7 +70,8 @@ $(function () {
 */
 
     /**
-     * Funktion, die die Orte aus der Tabelle "ort" holt, die Daten fein umstrukturiert und sie dann an @link showPlaces übergibt
+     * Funktion, die die Orte aus der Tabelle "ort" holt, die Daten fein umstrukturiert und sie dann an @links
+     * showPlaces übergibt
      * @param apiUrl Basis-URL zur Api (ohne "/ort")
      */
     async function getPlaces(apiUrl) {
@@ -87,21 +88,29 @@ $(function () {
         // Extraktion und Umformattierung
         result = result
             .reduce((acc, place) => {
-                let lastEntry = acc[acc.length - 1];
+                let lastPlace = acc[acc.length - 1];
                 let movement = {
                     movementID: place.movementID,
                     movementName: place.movementName,
                     description: place.description,
-                    links: place.links,
+                    links: [place.link],
                     startYear: place.startYear,
                     endYear: place.endYear
                 };
                 // Gibt es überhaupt schon einen Eintrag?
-                if (lastEntry) {
-                    // Wenn der letzte Eintrag gleich ist (also die aktuelle Stadt schon im neuen Result acc existiert),
-                    // dann füge ihm das aktuelle movement hinzu
-                    if (place.placeName === lastEntry.placeName) {
-                        lastEntry.movements.push(movement);
+                if (lastPlace) {
+                    // Wenn der letzte Eintrag gleich ist (also die aktuelle Stadt schon im neuen Result acc existiert)
+                    if (place.placeName === lastPlace.placeName) {
+                        let lastMovement = lastPlace.movements[lastPlace.movements.length - 1];
+                        // Wenn das aktuelle movement gleich dem letzten ist, dann hat sich nur der Link geändert
+                        if (place.movementName === lastMovement.movementName) {
+                            // Füge also den aktuellen Link hinzu
+                            lastMovement.links.push(place.link);
+                        }
+                        // Ansonsten füge das neue movement der aktuellen Stadt hinzu
+                        else {
+                            lastPlace.movements.push(movement);
+                        }
                     }
                     // Ansonsten füge den Ort neu hinzu
                     else {
@@ -121,8 +130,19 @@ $(function () {
                         movements: [movement]
                     });
                 }
+
                 return acc;
             }, []);
+
+        // Filtere leere Links heraus
+        result = result.map(place => {
+            place.movements = place.movements.map(movement => {
+                // Wenn der Link nicht falsy ist (null, "", ...), dann bleibt er drin
+                movement.links = movement.links.filter(link => link);
+                return movement;
+            });
+            return place;
+        });
         // DEBUG
         console.log('result after: %o', result);
         showPlaces(result);
@@ -173,9 +193,16 @@ $(function () {
                     if (startYear)
                         popupContent += `<em>Aktiv von ${startYear} bis ${endYear}</em><br>`;
                     if (description)
-                        popupContent += `${description}<br>`;
-                    if (links)
-                        popupContent += `${links}<br>`;
+                        popupContent += `${description}<br><br>`;
+                    // Ist das Link-Array vorhanden und nicht leer?
+                    if (Array.isArray(links) && (links.length > 0)) {
+                        popupContent += 'Weitere Infos:<br>';
+                        for (let link of links) {
+                            // Füge jeden Link in neuer Zeile hinzu
+                            popupContent += `${link}<br>`;
+                        }
+                        // popupContent += `${links}<br>`;
+                    }
                     popupContent += '<br>';
                     popup.setContent(popupContent);
                 }
@@ -188,7 +215,6 @@ $(function () {
 
 // DEBUG
 getPlaces(API_URL);
-
 
 // Ende document ready function
 });

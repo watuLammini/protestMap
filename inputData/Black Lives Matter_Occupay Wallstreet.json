@@ -1,0 +1,26 @@
+[ 
+{
+"movementName": "Black Lives Matter", 
+"placeName": "USA",
+"latitude": 40.712784,
+"longitude":  -74.005941,
+"description": "ist eine internationale Bewegung, die innerhalb der afroamerikanischen Gemeinschaft in den Vereinigten Staaten entstanden ist und sich gegen Gewalt gegen Schwarze bzw. People of Color einsetzt. Black Lives Matter organisiert regelmäßig Proteste gegen die Tötung Schwarzer durch Polizeibeamte und zu breiteren Problemen wie Racial Profiling, Polizeigewalt und Rassismus.",
+"links": [
+"https://blacklivesmatter.com/",
+"https://www.blacklivesmatterberlin.de/"
+],
+"startYear": 2013,
+"endYear": null
+},
+{"movementName": "Occupy Wallstreet", 
+"placeName": "USA",
+"latitude": 40.7830603,
+"longitude":  -73.9712488,
+"description": "Occupay Wallstreet ist eine internationale Bewegung, welche sich gegen finanzielle Ungerechtigkeit und die Macht von Banken einsetzte. Die Demonstrant*innen verlangten eine stärkere Kontrolle des Banken- und Finanzsektors durch die Politik, eine Korrektur des als höchst ungerecht empfundenen Steuersystems und eine nachdrückliche Verringerung der Schere zwischen Armen und Reichen.",
+"links": [
+"https://www.bpb.de/politik/wirtschaft/finanzmaerkte/135540/occupy-bewegung?p=0"
+],
+"startYear": 2011,
+"endYear": 2012
+}
+]

@@ -1,0 +1,38 @@
+[ 
+{
+"movementName": "Yén a Marre - Wir haben es satt", 
+"placeName": "Senegal",
+"latitude": 14.497401,
+"longitude": -14.452362,
+"description": "Die Jugendbewegung Y’en a marre entstand im Januar 2011, als der Senegal von einer Krise in der Stromversorgung geplagt wurde. Zusammen mit dem Journalisten Fadel Barro initiierten die Musiker der Hip Hop Gruppe Keur Gui eine Bewegung, deren Forderungen sich anfänglich auf ein Ende der Stromausfälle konzentrierten, aber bald auf soziale Gerechtigkeit und ein Ende der Korruption ausweiteten. Durch Rapp-Songs werden auf Schwachstellen der Regierung aufmerksam gemacht. Der Song Pareel fordert beispielsweise die Menschen auf, einen neuen Präsidenten zu wählen.",
+"links": [
+"https://www.deutschlandfunkkultur.de/protest-rapper-im-senegal-musiker-die-regime-stuerzen.979.de.html?dram:article_id=441400",
+"https://www.boell.de/de/2016/02/23/rapper-protest-und-reformen-wir-koennen-das-schaffen"
+],
+"startYear": 2011,
+"endYear": null
+},
+{
+"movementName": "Studierendenproteste in Süd Afrika",
+"placeName": "Süd Afrika",
+"latitude": -26.2041028,
+"longitude": 28.0473051,
+"description": "#rhodesmustfall, #OpenStellenbosch, #BlackStudentMovement, #feesmustfall, #PatriarchyMustFall. Studierende fordern das Ende eurozentrischer Curricula, die Beseitigung kolonialer Statuen, die Umbenennung von Gebäuden, die Politiker der Apartheid ehrten, und die Diversifizierung des noch immer hauptsächlich weißen und männlichen Lehrkörpers. Sie wollten eine neue Universitätskultur – eine, die nicht nur gleiche Chancen auf Bildung versprach, sondern auch Zugang und Teilhabe für alle. Dabei fordern sie auch eine Senkung der Studiengebühren.",
+"links": [
+"https://www.zeit.de/kultur/2016-01/suedafrika-studenten-proteste-johannesburg-10nach8/seite-2",
+"https://www.spiegel.de/lebenundlernen/uni/suedafrikas-neue-apartheid-schwarze-studenten-wehren-sich-a-1079180.html",
+"https://www.yaez.de/schule/diskriminierung-in-suedafrika-schuelerinnen-kaempfen-fuer-ihren-afro/"
+]
+},
+{
+"movementName": "La Lucha",
+"placeName": "Demokratischen Republik Kongo",
+"latitude":  -0.228021,
+"longitude": 15.827659,
+"description": "Lucha steht für „Lutte pour le changement“, Kampf für Veränderung, und ist mit Protesten gegen staatliche Korruption und Vernachlässigung bekannt geworden.",
+"links": [
+"https://www.fluter.de/junge-Widerstandsbewegung-Lucha-im-Kongo",
+"https://info.arte.tv/de/rdcongo-praesidentschaftswahl-kabila-frist-verstrichen"
+]
+}
+]

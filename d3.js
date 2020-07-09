@@ -5016,7 +5016,7 @@ function chord() {
       x += dx;
     }
 
-    // Generate chords for each (non-empty) subgroup-subgroup link.
+    // Generate chords for each (non-empty) subgroup-subgroup links.
     i = -1; while (++i < n) {
       j = i - 1; while (++j < n) {
         var source = subgroups[j * n + i],
@@ -11490,7 +11490,7 @@ function treeRoot(root) {
   return tree;
 }
 
-// Node-link tree diagram using the Reingold-Tilford "tidy" algorithm
+// Node-links tree diagram using the Reingold-Tilford "tidy" algorithm
 function tree() {
   var separation = defaultSeparation$1,
       dx = 1,

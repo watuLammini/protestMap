@@ -21,7 +21,7 @@ const CONNECTION_DATA = {
 /**
  * Fall true, werden die Daten anfangs formattiert (bspw. das Datum). Das ist nur einmal nötig, danach sollte der Wert auf false gesetzt werden.
  */
-const INIT_DB = false;
+const INIT_DB = true;
 let connection;
 
 /**
@@ -43,13 +43,14 @@ async function initDB() {
     }
 
     // DEBUG
-    testValidate(placesSchema, [
+    /*testValidate(placesSchema, [
         {
             placeID: 1,
             placeName: "München"
         }
-    ]);
-    insert();
+    ]);*/
+    readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
+    readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
 }
 
 // R: Führe die initDB in anonymer, globaler Funktion aus
@@ -60,11 +61,12 @@ async function initDB() {
 // R: Gib die Tabelle Ort formatiert zurück
 exports.getPlaces = async function () {
     try {
-        let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.description as description, m.links as links, m.startYear as startYear, m.endYear as endYear
+        let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.description as description, ml.link as link, m.startYear as startYear, m.endYear as endYear
             FROM movementPlace mp
                 INNER JOIN place p ON mp.placeID = p.id
                 INNER JOIN movement m ON mp.movementID = m.id
-                ORDER BY placeName DESC;`);
+                LEFT JOIN movementLinks ml ON ml.movementID = m.id
+                ORDER BY placeName, movementName ASC;`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
             .filter(place => (place.latitude && place.longitude))
@@ -82,20 +84,23 @@ exports.getPlaces = async function () {
 
 async function insert(data) {
     // DEBUG
-    data = [ {
+    /*data = [ {
         movementName: "noPAG",
         startYear: 2018,
         placeName: "München",
+        links: [
+            "https://www.nopagby.de/",
+            "https://de.wikipedia.org/wiki/Polizeiaufgabengesetz_(Bayern)"
+        ],
         latitude: 48.1551,
         longitude: 11.5418
-    } ];
+    } ];*/
     let validationResult = testValidate(placesInputSchema, data);
     if (validationResult) {
         for (let movement of data){
             let movementSet = {
                 name: movement.movementName,
                 description: movement.description,
-                links: movement.links,
                 startYear: movement.startYear,
                 endYear: movement.endYear
             };
@@ -104,6 +109,7 @@ async function insert(data) {
                 latitude: movement.latitude,
                 longitude: movement.longitude
             };
+
             try {
                 let resultM = await connection.query('INSERT INTO movement SET ? ' +
                     'ON DUPLICATE KEY UPDATE ? ;', [movementSet, movementSet]);
@@ -115,6 +121,11 @@ async function insert(data) {
                     'ON DUPLICATE KEY UPDATE ' +
                     'movementID = (SELECT id FROM movement WHERE name = ?), ' +
                     'placeID = (SELECT id FROM place WHERE name = ?) ', [movementSet.name, placeSet.name, movementSet.name, placeSet.name]);
+                for (let link of movement.links) {
+                    let resultML = await connection.query('INSERT IGNORE INTO movementLinks SET ' +
+                        'movementID = (SELECT id FROM movement WHERE name = ?), ' +
+                        'link = ? ;', [movementSet.name, link]);
+                }
             }
             catch (error) {
                 throw error;
@@ -129,4 +140,14 @@ function testValidate(schema, data) {
         console.log(ajv.errors);
     }
     return validation;
+}
+
+async function readAndInsertData(inputPath) {
+    try {
+        let input = fs.readFileSync(path.resolve(inputPath), 'utf-8');
+        input = await JSON.parse(input);
+        await insert(input);
+    } catch (error) {
+        console.error(error);
+    }
 }

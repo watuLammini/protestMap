@@ -14,13 +14,14 @@
         "type": "string"
       },
       "links": {
-        "type": "string"
+        "type": "array",
+        "items": { "type": "string" }
       },
       "startYear": {
-        "type": "number"
+        "type": [ "number", "null" ]
       },
       "endYear": {
-        "type": "number"
+        "type": [ "number", "null" ]
       },
       "placeName": {
         "type": "string"
@@ -32,6 +33,7 @@
         "type": "number"
       }
     },
-    "required": ["movementName", "placeName", "latitude", "longitude"]
+    "required": ["movementName", "placeName", "latitude", "longitude"],
+    "additionalProperties": false
   }
 }
