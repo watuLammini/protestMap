@@ -4,7 +4,7 @@
 $(function () {
 
 // == Konstanten ==
-    const API_URL = 'http://localhost:3000/api';
+    const API_URL = '/api';
 /*// Bereich der auswählbaren Jahre
     const START_YEAR = 1000;
     const END_YEAR = 1850;
@@ -19,7 +19,7 @@ $(function () {
      */
     let markers = new Map();
 // R: Initialisiere die Karte mit gegebenem Mittelpunkt (München) und Zoomstufe
-    const map = L.map('map').setView([48.142992, 11.573495], 2);
+    const map = L.map('map').setView([48.142992, 11.573495], 5);
 // R: Füge die OpenStreetMap tiles hinzu
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

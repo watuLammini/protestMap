@@ -1,0 +1,77 @@
+[
+  {
+    "movementName": "Grüne Bewegung Iran 2009",
+    "placeName": "Tehran",
+    "latitude": 35.715298,
+    "longitude": 51.404343,
+    "description": "Im Juni 2009 demonstrieren Tausende Iranerinnen und Iraner auf den Straßen Teherans. Sie werfen dem Regime vor, die Ergebnisse der Präsidentschaftswahlen 2009 gefälscht zu haben. Das Mullah-Regime reagiert mit Härte auf die Demonstranten. Teheran wird zum Schlachtfeld. Polizisten prügeln auf wehrlose Menschen ein. Es gibt zahlreiche Tote wie die Studentin Neda Agha-Soltan, die durch ihren gewaltsamen Tod zur Ikone der iranischen Widerstandsbewegung wurde.",
+    "links": [
+      "https://www.planet-wissen.de/kultur/naher_und_mittlerer_osten/die_geschichte_des_irans/pwiediegruenerevolution100.html",
+      "https://www.youtube.com/watch?v=QptUELNc1Ls"
+    ],
+    "startYear": 2009,
+    "endYear": 2009
+  },
+  {
+    "movementName": "Iran Protest 2017 bis 2018",
+    "placeName": "Tehran",
+    "latitude": 35.715298,
+    "longitude": 51.404343,
+    "description": "Seit Ende Dezember 2017 protestieren Menschen in Iran. Zunächst gingen sie vor allem gegen Armut, Arbeitslosigkeit und die schlechte Versorgungslage auf die Straße. Doch längst richtet sich die Unzufriedenheit gegen das politische System und seine religiöse Ordnung.",
+    "links": [
+      "https://www.bpb.de/politik/hintergrund-aktuell/262759/proteste-in-iran",
+      "https://www.theguardian.com/world/2018/jan/02/iran-protests-how-did-they-start-and-where-are-they-heading"
+    ],
+    "startYear": 2017,
+    "endYear": 2018
+  },
+  {
+    "movementName": "Iran Protest 2019",
+    "placeName": "Tehran",
+    "latitude": 35.715298,
+    "longitude": 51.404343,
+    "description": "Die Proteste begannen Mitte November, als die Regierung eine Erhöhung der Benzinpreise bekanntgab. Kraftstoff ist im Iran eigentlich staatlich subventioniert. Die Proteste erreichten bislang nicht das Ausmaß der „grünen Bewegung“ von 2009. Allerdings kam es auch dieses Mal zur Eskalation und zu Gewalt, ähnlich wie bei den Protesten – möglicherweise ein Zeichen für den wachsenden Unmut der Menschen mit ihrer Situation. Ähnliche Demonstrationen gab es bereits zum Jahreswechsel 2018, auch damals bei weitem nicht nur in Teheran.",
+    "links": [
+      "https://www.deutschlandfunk.de/iran-entsetzen-ueber-brutales-vorgehen-gegen-proteste.2852.de.html?dram:article_id=464954",
+      "https://www.hrw.org/de/news/2019/11/19/iran-sicherheitskraefte-schlagen-proteste-nieder"
+    ],
+    "startYear": 2019,
+    "endYear": 2019
+  },
+  {
+    "movementName": "Proteste von Kurd*innen",
+    "placeName": "Qamishlo",
+    "latitude": 37.054220,
+    "longitude": 41.236330,
+    "description": "Der Abzug der US-Truppen aus Nordsyrien im Oktober 2019 hat bei vielen Kurden für Bitterkeit gesorgt. In Deutschland, in der Türkei, in Syrien, im Irak oder im Iran kämpfen Kurd*innen um ihre Identität. Der Traum eines eigenen Staates ist in weite Ferne gerückt.",
+    "links": [
+      "https://www.zdf.de/dokumentation/zdfinfo-doku/die-kurden-unterdrueckung-terrorismus-und-verrat-102.html"
+    ],
+    "startYear": 2019,
+    "endYear": null
+  },
+  {
+    "movementName": "Proteste in Indien gegen sexualisierte Gewalt",
+    "placeName": "Neu-Delhi",
+    "latitude": 28.632429,
+    "longitude": 77.218788,
+    "description": "In Indien gibt es immer wieder große Proteste gegen die (sexualisierte) Gewalt an Frauen und Mädchen. So auch 2019 nach der Vergewaltigung und Ermordung einer Tierärztin, sowie eines 6-jährigen Mädchens.",
+    "links": [
+      "https://www.zeit.de/gesellschaft/zeitgeschehen/2019-12/indien-vergewaltigungen-ermordungen-frauen-protest-demonstrationen",
+      "https://timesofindia.indiatimes.com/city/hyderabad/hyderabad-vet-rape-murder-police-seek-custody-of-accusedprotests-continue/articleshow/72335022.cms",
+      "https://www.zdf.de/nachrichten/heute/indien-kaempft-fuer-sicherheit-frauen-nach-vergewaltigung-102.html"
+    ]
+  },
+  {
+    "movementName": "Gulabi Gang",
+    "placeName": "Uttar Pradesh",
+    "latitude": 26.846708,
+    "longitude": 80.946159,
+    "description": "Die Gulabi Gang ist ein Zusammenschluss indischer Frauen im nördlichen Bundesstaat Uttar Pradesh, der sich für Frauenrechte und gegen soziale Ungerechtigkeit einsetzt. Gulabi bedeutet rosa. Die Farbe wird in Indien nicht als feminine Farbe wahrgenommen. Die Gründerin der Gulabi Gang, Sampat Pal Devi, hat diese Farbe nach eigener Aussage gewählt, da sie nicht von einer politischen Gruppe oder Partei verwendet wird. Charakteristisch für die Frauen, die der Gulabi Gang angehören, sind pinkfarbene Saris und Schlagstöcke aus Bambus (Lathi), die üblicherweise von Polizeiangehörigen getragen werden.",
+    "links": [
+      "https://de.wikipedia.org/wiki/Gulabi_Gang"
+    ],
+    "startYear": 2006,
+    "endYear": null
+  }
+]

@@ -1,0 +1,27 @@
+{
+  "name": "infovis_kaiser_und_hoefe",
+  "version": "0.1.0",
+  "description": "Best information visualisation project: Explore historical data about historical dynasties and their people.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node backend-server/map.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab2.cip.ifi.lmu.de:kastrup/infovis_kaiser_und_hoefe.git"
+  },
+  "author": "Ruben Lenz, Ali von Wedel",
+  "license": "ISC",
+  "dependencies": {
+    "ajv": "^6.12.2",
+    "cors": "^2.8.5",
+    "d3": "^5.16.0",
+    "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.1.0",
+    "node": "^13.14.0",
+    "nouislider": "^14.5.0",
+    "npm": "^6.14.5"
+  }
+}

@@ -9,9 +9,9 @@ let ajv = new Ajv( {allErrors: true} );
 
 const CONNECTION_DATA = {
     host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'protestMap',
+    user: 'watu',
+    password: 'i_QMnSHY72zb0Vvb12E6',
+    database: 'watu_protestMap',
     multipleStatements: true,
     connectionLimit: 10,
     // DEBUG
@@ -40,10 +40,17 @@ async function initDB() {
         catch (error) {
             throw error;
         }
-        readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
-        readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
-        readAndInsertData('inputData/Svea.json');
     }
+
+    // DEBUG
+    /*testValidate(placesSchema, [
+        {
+            placeID: 1,
+            placeName: "München"
+        }
+    ]);*/
+    readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
+    readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
 }
 
 // R: Führe die initDB in anonymer, globaler Funktion aus

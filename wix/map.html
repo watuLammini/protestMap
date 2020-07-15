@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>InfoVis Best - Map</title>
+    <!-- Leaflet stylesheet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+    <!-- Leaflet Javascript -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- NoUISlider -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css" />
+<!--    <script src="node_modules/nouislider/distribute/nouislider.js"></script>-->
+<!--    <links rel="stylesheet" href="node_modules/nouislider/distribute/nouislider.css" />-->
+    <script>
+        // @formatter:off
+        // @formatter:on
+
+        $(function () {
+
+// == Konstanten ==
+            const API_URL = 'http://localhost:3000/api';
+            /*// Bereich der auswählbaren Jahre
+                const START_YEAR = 1000;
+                const END_YEAR = 1850;
+            // Alle x Jahre gibt es Labels/pips
+                const YEAR_SCALE_STEP = 100;
+
+                let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];*/
+
+            /**
+             * Speichert alle Marker mit Namen des Ortes als Key
+             * @type {Map<String, Object>}
+             */
+            let markers = new Map();
+// R: Initialisiere die Karte mit gegebenem Mittelpunkt (München) und Zoomstufe
+            const map = L.map('map').setView([48.142992, 11.573495], 5);
+// R: Füge die OpenStreetMap tiles hinzu
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+// Update der Karte bei Bewegung, momentan nicht nötig
+// map.on("moveend", () => { });
+
+            /*
+            // == SLIDER ==
+            // Hole das container-div
+                const slider = $('#slider')[0];
+            // Die Beschriftung des Sliders
+                let scaleValues = [];
+                for (value = START_YEAR; value < END_YEAR; value += YEAR_SCALE_STEP) {
+                    scaleValues.push(value);
+                }
+                if (scaleValues[scaleValues.length - 1] !== END_YEAR) {
+                    scaleValues.push(END_YEAR);
+                }
+            // Erstelle den Slider
+                noUiSlider.create(slider, {
+                    range: {
+                        min: START_YEAR,
+                        max: END_YEAR
+                    },
+                    start: [START_YEAR, END_YEAR],
+                    connect: true,
+                    pips: {
+                        mode: 'values',
+                        values: scaleValues,
+                        density: 5
+                    }
+                });
+
+            // Event-Listener für Änderungen der Slider-Werte
+                slider.noUiSlider.on('set', values => {
+                    // Formatiere die Jahreszahl als Datum
+                    yearRange = values.map(value => {
+                        let newValue = Math.floor(value);
+                        newValue = newValue + ('-00-00');
+                        return newValue;
+                    });
+                    getPersonPlaces(API_URL, yearRange[0], yearRange[1], bornDied);
+                    // DEBUG
+                    // console.log('YearRange: %o', yearRange);
+                });
+            */
+
+            /**
+             * Funktion, die die Orte aus der Tabelle "ort" holt, die Daten fein umstrukturiert und sie dann an @links
+             * showPlaces übergibt
+             * @param apiUrl Basis-URL zur Api (ohne "/ort")
+             */
+            async function getPlaces(apiUrl) {
+                // GET-Abrfage an die API
+                let result = await fetch(`${apiUrl}/places`, {
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+                // Extraktion des Bodys in JSON
+                result = await result.json();
+                // DEBUG
+                console.log('result before: %o', result);
+                // Extraktion und Umformattierung
+                result = result
+                    .reduce((acc, place) => {
+                        let lastPlace = acc[acc.length - 1];
+                        let movement = {
+                            movementID: place.movementID,
+                            movementName: place.movementName,
+                            description: place.description,
+                            links: [place.link],
+                            startYear: place.startYear,
+                            endYear: place.endYear
+                        };
+                        // Gibt es überhaupt schon einen Eintrag?
+                        if (lastPlace) {
+                            // Wenn der letzte Eintrag gleich ist (also die aktuelle Stadt schon im neuen Result acc existiert)
+                            if (place.placeName === lastPlace.placeName) {
+                                let lastMovement = lastPlace.movements[lastPlace.movements.length - 1];
+                                // Wenn das aktuelle movement gleich dem letzten ist, dann hat sich nur der Link geändert
+                                if (place.movementName === lastMovement.movementName) {
+                                    // Füge also den aktuellen Link hinzu
+                                    lastMovement.links.push(place.link);
+                                }
+                                // Ansonsten füge das neue movement der aktuellen Stadt hinzu
+                                else {
+                                    lastPlace.movements.push(movement);
+                                }
+                            }
+                            // Ansonsten füge den Ort neu hinzu
+                            else {
+                                pushPlace(acc);
+                            }
+                        } else {
+                            pushPlace(acc);
+                        }
+
+                        // Konstruiert einen neuen Ort und fügt ihn acc hinzu
+                        function pushPlace(acc) {
+                            acc.push({
+                                placeID: place.placeID,
+                                placeName: place.placeName,
+                                latitude: place.latitude,
+                                longitude: place.longitude,
+                                movements: [movement]
+                            });
+                        }
+
+                        return acc;
+                    }, []);
+
+                // Filtere leere Links heraus
+                result = result.map(place => {
+                    place.movements = place.movements.map(movement => {
+                        // Wenn der Link nicht falsy ist (null, "", ...), dann bleibt er drin
+                        movement.links = movement.links.filter(link => link);
+                        return movement;
+                    });
+                    return place;
+                });
+                // DEBUG
+                console.log('result after: %o', result);
+                showPlaces(result);
+                addMovements(result);
+            }
+
+            /**
+             * Zeigt die Bewegungen mit Markern auf der Karte an
+             * @param places
+             */
+            function showPlaces(places) {
+                let markersGroup = L.featureGroup();
+                // Icon mit eigenem Sprite
+                let protestIcon = L.icon({
+                    iconUrl: 'https://watu.uber.space/assets/feuer.svg',
+                    iconSize:     [32, 32], // size of the icon
+                    // iconAnchor:   [22, 94], // point of the icon which will correspond to marker's location
+                    // popupAnchor:  [-3, -76] // point from which the popup should open relative to the iconAnchor
+                });
+                for (let place of places) {
+                    let {placeName, latitude, longitude} = place;
+                    let marker = L.marker([latitude, longitude],
+                        {title: placeName,
+                            icon: protestIcon});
+                    // Speichere den Marker in der Map
+                    markers.set(placeName, marker);
+                    markersGroup.addLayer(marker);
+                }
+                markersGroup.addTo(map);
+            }
+
+            async function addMovements(places) {
+                for (let place of places) {
+                    let {placeName, movements} = place;
+                    if (movements) {
+                        // Hol den Marker des aktuellen Ortes aus der Map
+                        let marker = markers.get(placeName);
+                        let popup = L.popup({
+                            maxWidth: 500
+                        });
+                        for (let movement of movements) {
+                            let {movementName, description, links, startYear, endYear} = movement;
+                            // Es wäre so schön, hier den nullish coalescing operator nutzen zu können :-(.
+                            // Wenn endYear nicht gesestzt ist, setze es auf 'heute'
+                            endYear = endYear || 'heute';
+                            let oldPopupContent = popup.getContent() || '';
+                            let popupContent = `${oldPopupContent}<strong>${movementName}</strong><br>`;
+                            if (startYear)
+                                popupContent += `<em>Aktiv von ${startYear} bis ${endYear}</em><br>`;
+                            if (description)
+                                popupContent += `${description}<br><br>`;
+                            // Ist das Link-Array vorhanden und nicht leer?
+                            if (Array.isArray(links) && (links.length > 0)) {
+                                popupContent += 'Weitere Infos:<br>';
+                                for (let link of links) {
+                                    // Füge jeden Link in neuer Zeile hinzu
+                                    popupContent += `${link}<br>`;
+                                }
+                                // popupContent += `${links}<br>`;
+                            }
+                            popupContent += '<br>';
+                            popup.setContent(popupContent);
+                        }
+                        marker.bindPopup(popup);
+                        // Aktualisiere den marker im Set
+                        markers.set(placeName, marker);
+                    }
+                }
+            }
+
+// DEBUG
+            getPlaces(API_URL);
+
+// Ende document ready function
+        });
+
+    </script>
+    <style>
+        #map {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<div id="map">
+</div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+// Alle Daten, die nachher auf der Karte sichtbar sein sollen, müssen in einem bestimmten Format vorliegen, damit sie
+// automatisiert in die Datenbank übernommen werden können. Das Format wird im Folgenden beschrieben.
+// Ihr könnt gerne diese Datei hier benutzen und die nachfolgende Vorlage mit eigenen Daten füttern. Wichtig ist
+// jedoch, dass die Datei in einem einfachen Texteditor (oder einem Editor für Quellcode) bearbeitet wird und nicht
+// in LibreOffice o.Ä. (weil die Dateien meist in anderen Formaten abspeichern). Soweit ich weiß, heißt der
+// Standardeditor unter Windows einfach "Texteditor", "Notepad++" ist ansonsten zu empfehlen. Am besten wird die
+// Datei mit der Endung .json gespeichert, sonst .txt.
+
+// Alles, was hinter (oder /*) kommt, ist ein Kommentar und zählt nicht zu den eigentlichen Daten (wie diese Zeile).
+// Jede Datei muss mit einer eckigen Klammer beginnen und enden; das heißt, dass sich darin mehrere Daten, in
+// unserem Fall Protestbewegungen, befinden können
+[
+  // Dann kommt eine geschweifte Klammer für jede Bewegung
+  {
+    // Innerhalb der geschweiften Klammern gibt es verschiedene festgelegte Variablen, die dann die eigentlichen
+    // Daten erhalten. Die Variablen heißen immer gleich und nach ihnen kommt ein Doppelpunkt. Sowohl die Variablen
+    // als auch deren Werte (also das nach dem Doppelpunkt) müssen (meistens) in Anführungszeichen stehen. Die
+    // Variablen werden mit Kommas getrennt. Die Reihenfolge ist egal.
+
+    // Name der Protestbewegung
+    "movementName": "noPAG",
+    // Name des Ortes, der dann angezeigt wird
+    "placeName": "München",
+
+    // Ausnahme: Zahlen werden ohne Anführungszeichen benutzt.
+    // latitude und longitude sind der Breiten- und Längengrad. Man findet diese bspw. unter openstreetmap.org wenn
+    // man rechts auf einen Ort klickt, dann "Adresse anzeigen" oder über Google. An diesem Punkt wird später der
+    // Marker in der Karte sichtbar sein.
+    "latitude": 48.1551,
+    "longitude": 11.5418,
+    // Die Beschreibung ist später in einem Popup zu sehen. Es gibt derzeit keine Längenbeschränkung, evtl
+    // erhält das Popup einen Scrollbalken o.Ä.
+    "description": "Das Bündnis „noPag – Nein! zum neuen Polizeiaufgabengesetz Bayern“ sieht durch das Gesetzesvorhaben der Staatsregierung rechtsstaatliche Grundprinzipien verletzt: Zusammen mit den bereits erfolgten Änderungen am PAG im Vorjahr, wird die Polizei künftig mit weitreichenden geheimdienstlichen Befugnissen ausgestattet. Somit wird die bayerische Polizei zu einer Überwachungsbehörde umfunktioniert und soll nach dem Willen des neuen Bundesinnenministers, Horst Seehofer, zum Vorbild für alle Bundesländer werden.",
+    // Weiterführende Links stehen kommagetrennt in eckigen Klammern, da es (wie bei den Protestbewegungen) ja
+    // nicht nur einer, sondern eine beliebige Anzahl sein kann
+    "links": [
+      "https://www.nopagby.de",
+      "https://www.sueddeutsche.de/muenchen/polizeiaufgabengesetz-demo-muenchen-1.3974391"
+    ],
+    // Für jede Bewegung kann ein Zeitraum angegeben werden, in dem diese aktiv war/ist. Wenn das endYear nicht
+    // oder wie hier auf "null" gesetzt ist, dann heißt das, dass die Bewegung immer noch aktiv ist.
+    "startYear": 2018,
+    "endYear": null
+  },
+  {
+    // Nächste Bewegung
+    "movementName": "...",
+    // ...
+  }
+  // Wichtig noch: Notwendig sind nur movementName, placeName, latitude und longitude für jede Bewegung. Der Rest ist
+  // optional, zumindest in dem Sinne, dass es keine Fehler im Programm gibt. Aber natürlich ist es umso schöner,
+  // je mehr Infos wir anzeigen können.
+]
