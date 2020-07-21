@@ -1,15 +1,22 @@
 const express = require('express');
 const cors = require('cors');
 const controller = require('./dbController');
+const path = require('path');
+var favicon = require('serve-favicon');
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
 app.use(cors());
+app.use(favicon(path.join('public/assets/Logo-Hand.png')));
+app.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'agfp.de');
+    next();
+});
 
-app.use('/api', controller);
 app.use(express.static('public'));
+app.use('/api', controller);
 // Test
 app.get('/helloWorld', (req, res) => {
     res.send("Hello world!");

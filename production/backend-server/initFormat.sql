@@ -96,7 +96,7 @@ INSERT INTO movementPlace (movementID, placeID) VALUES
     movementID = 3,
     placeID = 2;
 
-INSERT INTO movementLinks SET
+INSERT INTO movementLink SET
     movementID = 3,
     link = 'https://www.historisches-lexikon-bayerns.de/Lexikon/Räterepublik_Baiern_(1919)'
     ON DUPLICATE KEY UPDATE

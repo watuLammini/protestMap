@@ -12,94 +12,36 @@
   integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
   crossorigin=""></script>
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <!-- D3.js -->
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-<!--    <script src="node_modules/d3/dist/d3.js"></script>-->
-    <!-- NoUISlider -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css" />
+<!--    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>-->
+<!--    &lt;!&ndash; NoUISlider &ndash;&gt;-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.js"></script>-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/14.0.3/nouislider.min.css" />-->
 <!--    <script src="node_modules/nouislider/distribute/nouislider.js"></script>-->
 <!--    <links rel="stylesheet" href="node_modules/nouislider/distribute/nouislider.css" />-->
     <script src="map.js" type="module"></script>
     <style>
+        #explanations {
+            font-family: "Swiss 721 BT", sans-serif;
+        }
+        h1 {
+            font-size: 1.5rem;
+        }
         #map {
             position: relative;
             top: 0;
             left: 0;
             width: 100vw;
-            height: 90vh;
-        }
-        #slider {
-            margin: 10px 30px 40px 30px;
-            /*width: 60vw;*/
-            /*height: 2rem;*/
-        }
-        #bornDiedButtons {
-            position: absolute;
-            top: 0;
-            right: 0;
-            margin: 10px 20px 0 0;
-            font-size: 1.1rem;
-            z-index: 2002;
-            /*color: #3FB8AF;*/
-            /*display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;*/
-        }
-        #bornDiedButtons * {
-            /*flex-grow: 1;
-            flex-basis: auto;
-            text-align: center;*/
-        }
-        #legende {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            margin: 0 20px 10px 0;
-            z-index: 2002;
-        }
-        .legend {
-            margin: 0 5px 0 0;
-        }
-        #rang5 {
-            padding: 0 10px 0 10px;
-            background-color: hsl(300, 100%, 50%);
-        }
-        #rang4 {
-            padding: 0 10px 0 10px;
-            background-color: hsl(340, 100%, 50%);
-        }
-        #rang3 {
-            padding: 0 10px 0 10px;
-            background-color: hsl(20, 100%, 50%);
-        }
-        #rang2 {
-            padding: 0 10px 0 10px;
-            background-color: hsl(60, 100%, 50%);
-        }
-        #rangUnbekannt {
-            padding: 0 10px 0 10px;
-            background-color: hsl(100, 100%, 50%);
-        }
-        svg#svgDefinitions {
-            width: 0;
-            height: 0;
-        }
-        circle {
-            /*fill: red;*/
-            opacity: 0.5;
-        }
-        path {
-            opacity: 0.5;
+            height: 100vh;
         }
     </style>
 </head>
 <body>
-<div id="slider"></div>
+<div id="explanations">
+    <h1>Protest International</h1>
+    <p id="explanation">Hier könnt ihr Protestbewegungen auf der ganzen Welt erkunden. Klickt auf die Marker, um
+        mehr zu erfahren. Bald wird es auch die Möglichkeit geben, selbst Bewegungen hinzuzufügen.</p>
+</div>
 <div id="map">
 </div>
-<svg id="svgDefinitions" width="0" height="0">
-</svg>
 </body>
 </html>

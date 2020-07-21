@@ -31,7 +31,7 @@ async function initDB() {
     // New: Use a connection pool
     connection = await mysql.createPool(CONNECTION_DATA);
     // Konfiguration, damit Group By und die Datumstransformation funktioniert
-    connection.query("SET sql_mode = '';");
+    // connection.query("SET sql_mode = '';");
     if (INIT_DB) {
         let initQuery = fs.readFileSync(path.resolve('backend-server/initFormat.sql'), 'utf-8');
         try {
@@ -40,17 +40,10 @@ async function initDB() {
         catch (error) {
             throw error;
         }
+        readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
+        readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
+        readAndInsertData('inputData/Svea.json');
     }
-
-    // DEBUG
-    /*testValidate(placesSchema, [
-        {
-            placeID: 1,
-            placeName: "München"
-        }
-    ]);*/
-    readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
-    readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
 }
 
 // R: Führe die initDB in anonymer, globaler Funktion aus
@@ -65,7 +58,7 @@ exports.getPlaces = async function () {
             FROM movementPlace mp
                 INNER JOIN place p ON mp.placeID = p.id
                 INNER JOIN movement m ON mp.movementID = m.id
-                LEFT JOIN movementLinks ml ON ml.movementID = m.id
+                LEFT JOIN movementLink ml ON ml.movementID = m.id
                 ORDER BY placeName, movementName ASC;`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
@@ -122,7 +115,7 @@ async function insert(data) {
                     'movementID = (SELECT id FROM movement WHERE name = ?), ' +
                     'placeID = (SELECT id FROM place WHERE name = ?) ', [movementSet.name, placeSet.name, movementSet.name, placeSet.name]);
                 for (let link of movement.links) {
-                    let resultML = await connection.query('INSERT IGNORE INTO movementLinks SET ' +
+                    let resultML = await connection.query('INSERT IGNORE INTO movementLink SET ' +
                         'movementID = (SELECT id FROM movement WHERE name = ?), ' +
                         'link = ? ;', [movementSet.name, link]);
                 }

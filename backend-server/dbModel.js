@@ -4,7 +4,11 @@ const path = require('path');
 const Ajv = require('ajv');
 const placesSchema = require('./placesSchema');
 const placesInputSchema = require('./placesInputSchema');
+const createDOMPurify = require('dompurify');
+const { JSDOM } = require('jsdom');
 
+const window = new JSDOM('').window;
+const domPurify = createDOMPurify(window);
 let ajv = new Ajv( {allErrors: true} );
 
 const CONNECTION_DATA = {
@@ -19,7 +23,8 @@ const CONNECTION_DATA = {
 };
 
 /**
- * Fall true, werden die Daten anfangs formattiert (bspw. das Datum). Das ist nur einmal nötig, danach sollte der Wert auf false gesetzt werden.
+ * Fall true, werden die Daten anfangs formattiert (bspw. das Datum). Das ist nur einmal nötig, danach sollte der Wert
+ * auf false gesetzt werden.
  */
 const INIT_DB = true;
 let connection;
@@ -31,7 +36,7 @@ async function initDB() {
     // New: Use a connection pool
     connection = await mysql.createPool(CONNECTION_DATA);
     // Konfiguration, damit Group By und die Datumstransformation funktioniert
-    connection.query("SET sql_mode = '';");
+    // connection.query("SET sql_mode = '';");
     if (INIT_DB) {
         let initQuery = fs.readFileSync(path.resolve('backend-server/initFormat.sql'), 'utf-8');
         try {
@@ -52,13 +57,14 @@ async function initDB() {
 })();
 
 // R: Gib die Tabelle Ort formatiert zurück
-exports.getPlaces = async function () {
+exports.getPlaces = async function (confirmed = true) {
+    let tableNames = getTableNames(confirmed);
     try {
         let result = await connection.query(`SELECT p.id as placeID, p.name as placeName, p.latitude, p.longitude, m.id as movementID, m.name as movementName, m.description as description, ml.link as link, m.startYear as startYear, m.endYear as endYear
-            FROM movementPlace mp
-                INNER JOIN place p ON mp.placeID = p.id
-                INNER JOIN movement m ON mp.movementID = m.id
-                LEFT JOIN movementLinks ml ON ml.movementID = m.id
+            FROM ${tableNames.movementPlaceTable} mp
+                INNER JOIN ${tableNames.placeTable} p ON mp.placeID = p.id
+                INNER JOIN ${tableNames.movementTable} m ON mp.movementID = m.id
+                LEFT JOIN ${tableNames.movementLinkTable} ml ON ml.movementID = m.id
                 ORDER BY placeName, movementName ASC;`);
         result = result[0]
             // R: Gib nur Ergebnisse mit vorhanden Koordinaten zurück
@@ -75,7 +81,39 @@ exports.getPlaces = async function () {
     }
 };
 
-async function insert(data) {
+exports.processInput = async function(data, confirmed = false) {
+    domPurify.setConfig( {ALLOWED_TAGS: [] });
+    data = JSON.parse(domPurify.sanitize(JSON.stringify(data)));
+    for (let key in data) {
+        if (data.hasOwnProperty(key)) {
+            switch (key) {
+                case "":
+                    data[key] = null;
+                    break;
+                case "latitude":
+                    data[key] = parseInt(data[key]);
+                case "longitude":
+                    data[key] = parseInt(data[key]);
+                case "startYear":
+                    data[key] = parseInt(data[key]);
+                case "endYear":
+                    data[key] = parseInt(data[key]);
+            }
+        }
+    }
+    if (data.links) {
+        data.links = data.links.split(',');
+        for (let [i, link] of data.links.entries()) {
+            data.links[i] = link.trim();
+        }
+    }
+    else {
+        data.links = [];
+    }
+    return await insert([ data ], confirmed);
+};
+
+async function insert(data, confirmed = true) {
     // DEBUG
     /*data = [ {
         movementName: "noPAG",
@@ -88,9 +126,18 @@ async function insert(data) {
         latitude: 48.1551,
         longitude: 11.5418
     } ];*/
-    let validationResult = testValidate(placesInputSchema, data);
-    if (validationResult) {
+    let response = { errors: null };
+    let validationResult = validate(placesInputSchema, data);
+    if (!validationResult.errors) {
         for (let movement of data){
+            // Remove NaN values
+            for (const key in movement) {
+                if (movement.hasOwnProperty(key)) {
+                    if (Number.isNaN(movement[key])) {
+                        movement[key] = null;
+                    }
+                }
+            }
             let movementSet = {
                 name: movement.movementName,
                 description: movement.description,
@@ -103,21 +150,22 @@ async function insert(data) {
                 longitude: movement.longitude
             };
 
+            let tableNames = getTableNames(confirmed);
             try {
-                let resultM = await connection.query('INSERT INTO movement SET ? ' +
-                    'ON DUPLICATE KEY UPDATE ? ;', [movementSet, movementSet]);
-                let resultP = await connection.query('INSERT INTO place SET ? ' +
-                    'ON DUPLICATE KEY UPDATE ? ;', [placeSet, placeSet]);
-                let resultMP = await connection.query('INSERT INTO movementPlace SET ' +
-                    'movementID = (SELECT id FROM movement WHERE name = ?), ' +
-                    'placeID = (SELECT id FROM place WHERE name = ?) ' +
-                    'ON DUPLICATE KEY UPDATE ' +
-                    'movementID = (SELECT id FROM movement WHERE name = ?), ' +
-                    'placeID = (SELECT id FROM place WHERE name = ?) ', [movementSet.name, placeSet.name, movementSet.name, placeSet.name]);
+                let resultM = await connection.query(`INSERT INTO ${tableNames.movementTable} SET ? 
+                    ON DUPLICATE KEY UPDATE ? ;`, [movementSet, movementSet]);
+                let resultP = await connection.query(`INSERT INTO ${tableNames.placeTable} SET ? 
+                    ON DUPLICATE KEY UPDATE ? ;`, [placeSet, placeSet]);
+                let resultMP = await connection.query(`INSERT INTO ${tableNames.movementPlaceTable} SET 
+                    movementID = (SELECT id FROM ${tableNames.movementTable} WHERE name = ?),
+                    placeID = (SELECT id FROM ${tableNames.placeTable} WHERE name = ?)
+                    ON DUPLICATE KEY UPDATE 
+                    movementID = (SELECT id FROM ${tableNames.movementTable} WHERE name = ?),
+                    placeID = (SELECT id FROM ${tableNames.placeTable} WHERE name = ?);`, [movementSet.name, placeSet.name, movementSet.name, placeSet.name]);
                 for (let link of movement.links) {
-                    let resultML = await connection.query('INSERT IGNORE INTO movementLinks SET ' +
-                        'movementID = (SELECT id FROM movement WHERE name = ?), ' +
-                        'link = ? ;', [movementSet.name, link]);
+                    let resultML = await connection.query(`INSERT IGNORE INTO ${tableNames.movementLinkTable} SET 
+                        movementID = (SELECT id FROM ${tableNames.movementTable} WHERE name = ?), 
+                        link = ? ;`, [movementSet.name, link]);
                 }
             }
             catch (error) {
@@ -125,22 +173,45 @@ async function insert(data) {
             }
         }
     }
-}
-
-function testValidate(schema, data) {
-    let validation = ajv.validate(schema, data);
-    if (!validation) {
-        console.log(ajv.errors);
+    else {
+        response.errors = validationResult.errors;
     }
-    return validation;
+    return response;
 }
 
-async function readAndInsertData(inputPath) {
+function validate(schema, data) {
+    let validation = ajv.validate(schema, data);
+    response = { errors: null };
+    if (!validation) {
+        console.error(ajv.errors);
+        response['errors'] = ajv.errors;
+    }
+    return response;
+}
+
+async function readAndInsertData(inputPath, confirmed = true) {
     try {
         let input = fs.readFileSync(path.resolve(inputPath), 'utf-8');
         input = await JSON.parse(input);
-        await insert(input);
+        await insert(input, confirmed);
     } catch (error) {
         console.error(error);
     }
+}
+
+function getTableNames(confirmed) {
+    let tableNames = {};
+    if (confirmed) {
+        tableNames.placeTable = 'place';
+        tableNames.movementTable = 'movement';
+        tableNames.movementPlaceTable = 'movementPlace';
+        tableNames.movementLinkTable = 'movementLink';
+    }
+    else {
+        tableNames.placeTable = 'placeUnconfirmed';
+        tableNames.movementTable = 'movementUnconfirmed';
+        tableNames.movementPlaceTable = 'movementPlaceUnconfirmed';
+        tableNames.movementLinkTable = 'movementLinkUnconfirmed';
+    }
+    return tableNames;
 }

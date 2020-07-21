@@ -1,6 +1,8 @@
 // @formatter:off
 // @formatter:on
 
+// == Konstanten ==
+const API_URL = 'http://localhost:3000/api';
 const ICON_SETTINGS = {
     iconUrl: './assets/Logo-Hand.png',
     iconSize: [45, 62], // size of the icon
@@ -10,8 +12,6 @@ const ICON_SETTINGS = {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-// == Konstanten ==
-    const API_URL = '/api';
 /*// Bereich der auswählbaren Jahre
     const START_YEAR = 1000;
     const END_YEAR = 1850;
@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const YEAR_SCALE_STEP = 100;
 
     let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];*/
+
+    // const QUERY_PARAMS = new URLSearchParams(window.location.search);
+    // const CONFIRMED = !QUERY_PARAMS.has('unconfirmed');
+    const CONFIRMED = true;
 
     /**
      * Speichert alle Marker mit Namen des Ortes als Key
@@ -82,8 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param apiUrl Basis-URL zur Api (ohne "/ort")
      */
     async function getPlaces(apiUrl) {
+        let url = apiUrl;
+        if (CONFIRMED) {
+            url += '/places';
+        }
+        else {
+            url += '/places?unconfirmed=true';
+        }
         // GET-Abrfage an die API
-        let result = await fetch(`${apiUrl}/places`, {
+        let result = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -215,8 +226,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-// DEBUG
+    function getFormData() {
+        let form = document.getElementById('protestInput');
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            let formData = new FormData(form);
+            let data = {};
+            for (const [key, value] of formData) {
+                data[key] = value;
+            }
+            sendFormData(API_URL, data);
+        });
+    }
+
+    async function sendFormData(url, data) {
+        let response = await fetch((API_URL + '/places?unconfirmed=true'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    }
+
 getPlaces(API_URL);
+getFormData();
 
 // Ende document ready function
 });
