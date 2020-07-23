@@ -4,7 +4,7 @@
 // == Konstanten ==
 const API_URL = 'http://localhost:3000/api';
 const ICON_SETTINGS = {
-    iconUrl: './assets/Logo-Hand.png',
+    iconUrl: '../assets/Logo-Hand.png',
     iconSize: [45, 62], // size of the icon
     // iconAnchor: [22, 34], // point of the icon which will correspond to marker's location
     popupAnchor: [0, -20] // point from which the popup should open relative to the iconAnchor
@@ -21,8 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];*/
 
     // const QUERY_PARAMS = new URLSearchParams(window.location.search);
-    // const CONFIRMED = !QUERY_PARAMS.has('unconfirmed');
-    const CONFIRMED = true;
+    // const ADMIN = !QUERY_PARAMS.has('unconfirmed');
+    const ADMIN = true;
+    const USER = document.getElementById('user').innerText;
+    const PASSWORD = document.getElementById('password').innerText;
 
     /**
      * Speichert alle Marker mit Namen des Ortes als Key
@@ -87,11 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function getPlaces(apiUrl) {
         let url = apiUrl;
-        if (CONFIRMED) {
-            url += '/places';
+        if (ADMIN) {
+            url += '/places?unconfirmed=true';
         }
         else {
-            url += '/places?unconfirmed=true';
+            url += '/places';
         }
         // GET-Abrfage an die API
         let result = await fetch(url, {
@@ -157,6 +159,13 @@ document.addEventListener('DOMContentLoaded', () => {
             place.movements = place.movements.map(movement => {
                 // Wenn der Link nicht falsy ist (null, "", ...), dann bleibt er drin
                 movement.links = movement.links.filter(link => link);
+                movement.links = movement.links.map(link => {
+                    // Wenn der Link nicht mit 'http' oder www 'anfängt', stelle 'www.' voran
+                    if (! (link.startsWith('http') || link.startsWith('www'))) {
+                        link = 'www.' + link;
+                    }
+                    return link;
+                });
                 return movement;
             });
             return place;
@@ -172,6 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param places
      */
     function showPlaces(places) {
+        // Lösche die alten Marker
+        markers.clear();
         let markersGroup = L.featureGroup();
         // Icon mit eigenem Sprite
         let protestIcon = L.icon(ICON_SETTINGS);
@@ -212,9 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         popupContent += 'Weitere Infos:<br>';
                         for (let link of links) {
                             // Füge jeden Link in neuer Zeile hinzu
-                            popupContent += `${link}<br>`;
+                            popupContent += `<a href="${link}" target="_blank">${link}</a><br>`;
                         }
-                        // popupContent += `${links}<br>`;
                     }
                     popupContent += '<br>';
                     popup.setContent(popupContent);
@@ -240,15 +250,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function sendFormData(url, data) {
-        let response = await fetch((API_URL + '/places?unconfirmed=true'), {
+        let response = await fetch((API_URL + '/places'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(data)
         });
+        if (response.ok) {
+            alert('Danke!');
+            getPlaces(API_URL);
+        }
+        else {
+            alert("Fehler beim Abschicken der Daten :'/");
+        }
     }
 
+    async function confirmUnconfirmedMovement(){
+        let response = await fetch((API_URL + '/confirmUnconfirmed'), {
+            method: 'POST',
+            headers: { 'Authorization': 'Basic ' + btoa(`${USER}:${PASSWORD}`) }
+        });
+        if (response.ok) {
+            alert('Sauba!');
+            location.reload();
+        }
+        else {
+            alert("Fehler beim Bestätigen der Daten :'/");
+        }
+    }
+
+document.getElementById('publish').addEventListener('click', confirmUnconfirmedMovement);
 getPlaces(API_URL);
 getFormData();
 

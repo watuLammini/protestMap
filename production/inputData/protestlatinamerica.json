@@ -1,0 +1,27 @@
+[
+	{
+	"movementName": "Mapuche",
+	"placeName": "südliches Chile und Argentinien",
+	"latitude": -38.618190,
+	"longitude": -72.328620,
+	"description": "Eine indigene Bevölkerungsgruppe im Süden Chiles und Argentiniens, die sich gegen Landnahme zur Wehr setzen. Beginnend mit der Kolonisation durch die spanische Truppen, zeigten sich die Mapuche als widerständig und schafften es vergleichsweise unabhängig von den spanischen Invasoren zu bleiben. Auch heute leisten sie Widerstand gegen Landnahme und Vertreibung. Die natürlichen Ressourcen (Holz, Wasser, Gas) der Regionen in denen die Mapuche leben, sind heute von Ausbeutung durch internationale Konzerne betroffen. Dabei kommen die Aktivist*innen der Mapuche immer wieder in Konflikt mit der chilenischen Polizei, anderen Sicherheitskräften und dem Militär. Bei diesen Auseinandersetzungen kamen schon mehrere Aktivist*innen zu Tode oder wurden schwer verletzt.",
+	"links": [
+			"https://en.wikipedia.org/wiki/Mapuche_history#Modern_conflict",
+			"https://amerika21.de/2020/06/240541/chile-mord-mapuche-carabineros]"
+			],
+	"startYear": 1541,
+	"endYear": null
+	},
+	{"movementName": "Ni una minos",
+	"placeName": "Buenos Aires, Argentinien",
+	"latitude": -34.612413,
+	"longitude": -58.437077,
+	"description": "Benannt nach einer Aussage der mexikanischen Aktivistin Susana Chávez (\"Ni una muerta más\" – \"Keine weitere tote Frau\") formierte sich diese feministische Bewegung im Frühling 2015 in Buenos Aires, Argentinien. Ihre Hauptanliegen ist der Kampf gegen Feminizide (Mord an Frauen) sowie eine Macho-Kultur und beschäftigen sich zusätzlich mit Transgender Rechten, Sexueller Gewalt oder auch Sexarbeit.",
+	"links": [
+			"https://en.wikipedia.org/wiki/Ni_una_menos",
+			"https://amerika21.de/dokument/196483/8-maerz-manifest-frauenstreik"
+			],
+	"startYear": 2015,
+	"endYear": null
+	}
+]

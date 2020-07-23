@@ -26,7 +26,7 @@ const CONNECTION_DATA = {
  * Fall true, werden die Daten anfangs formattiert (bspw. das Datum). Das ist nur einmal nötig, danach sollte der Wert
  * auf false gesetzt werden.
  */
-const INIT_DB = true;
+const INIT_DB = false;
 let connection;
 
 /**
@@ -48,6 +48,7 @@ async function initDB() {
         readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
         readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
         readAndInsertData('inputData/Svea.json');
+        readAndInsertData('inputData/protestlatinamerica.json');
     }
 }
 
@@ -199,6 +200,44 @@ async function readAndInsertData(inputPath, confirmed = true) {
     }
 }
 
+exports.confirmAllUnconfirmed = async function (){
+    const tablesConfirmed = getTableNames(true);
+    const tablesUnconfirmed = getTableNames(false);
+    try {
+        let resultM = await connection.query(`INSERT INTO ${tablesConfirmed.movementTable} (name, description, startYear, endYear)
+            SELECT name, description, startYear, endYear FROM ${tablesUnconfirmed.movementTable}
+            ON DUPLICATE KEY UPDATE
+                description = VALUES(description),
+                startYear = VALUES(startYear),
+                endYear = VALUES(endYear);`);
+        let resultP = await connection.query(`INSERT INTO ${tablesConfirmed.placeTable} (name, latitude, longitude)
+            SELECT name, latitude, longitude FROM ${tablesUnconfirmed.placeTable}
+            ON DUPLICATE KEY UPDATE
+                latitude = VALUES(latitude),
+                longitude = VALUES(longitude);`);
+        let resultMP = await connection.query(`INSERT IGNORE INTO ${tablesConfirmed.movementPlaceTable} (movementID, placeID)
+            SELECT mIdNew, pIdNew FROM ${tablesUnconfirmed.copyMPView};`);
+        let resultML = await connection.query(`INSERT IGNORE INTO ${tablesConfirmed.movementLinkTable} (movementID, link)
+            SELECT mIdNew, link FROM ${tablesUnconfirmed.copyMLView};`);
+    }
+    catch (error) {
+        console.error(error);
+        throw error;
+    }
+    await deleteUnconfirmed();
+};
+
+async function deleteUnconfirmed() {
+    const tables = getTableNames(false);
+    try {
+        let result1 = await connection.query(`TRUNCATE ${tables.movementPlaceTable}; TRUNCATE ${tables.movementLinkTable};`);
+        let result2 = await connection.query(`DELETE FROM ${tables.movementTable}; DELETE FROM ${tables.placeTable};`);
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+
 function getTableNames(confirmed) {
     let tableNames = {};
     if (confirmed) {
@@ -213,5 +252,7 @@ function getTableNames(confirmed) {
         tableNames.movementPlaceTable = 'movementPlaceUnconfirmed';
         tableNames.movementLinkTable = 'movementLinkUnconfirmed';
     }
+    tableNames.copyMPView = 'copyUnconfirmedMP';
+    tableNames.copyMLView = 'copyUnconfirmedML';
     return tableNames;
 }

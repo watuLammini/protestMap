@@ -20,9 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let yearRange = [START_YEAR + '-00-00', END_YEAR + '-00-00'];*/
 
-    const QUERY_PARAMS = new URLSearchParams(window.location.search);
-    const CONFIRMED = !QUERY_PARAMS.has('unconfirmed');
-
     /**
      * Speichert alle Marker mit Namen des Ortes als Key
      * @type {Map<String, Object>}
@@ -85,13 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param apiUrl Basis-URL zur Api (ohne "/ort")
      */
     async function getPlaces(apiUrl) {
-        let url = apiUrl;
-        if (CONFIRMED) {
-            url += '/places';
-        }
-        else {
-            url += '/places?unconfirmed=true';
-        }
+        let url = apiUrl + '/places';
         // GET-Abrfage an die API
         let result = await fetch(url, {
             headers: {
@@ -156,6 +147,13 @@ document.addEventListener('DOMContentLoaded', () => {
             place.movements = place.movements.map(movement => {
                 // Wenn der Link nicht falsy ist (null, "", ...), dann bleibt er drin
                 movement.links = movement.links.filter(link => link);
+                movement.links = movement.links.map(link => {
+                    // Wenn der Link nicht mit 'http' oder www 'anfängt', stelle 'www.' voran
+                    if (! (link.startsWith('http') || link.startsWith('www'))) {
+                        link = 'www.' + link;
+                    }
+                    return link;
+                });
                 return movement;
             });
             return place;
@@ -171,6 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
      * @param places
      */
     function showPlaces(places) {
+        // Lösche die alten Marker
+        markers.clear();
         let markersGroup = L.featureGroup();
         // Icon mit eigenem Sprite
         let protestIcon = L.icon(ICON_SETTINGS);
@@ -211,9 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         popupContent += 'Weitere Infos:<br>';
                         for (let link of links) {
                             // Füge jeden Link in neuer Zeile hinzu
-                            popupContent += `${link}<br>`;
+                            popupContent += `<a href="${link}" target="_blank">${link}</a><br>`;
                         }
-                        // popupContent += `${links}<br>`;
                     }
                     popupContent += '<br>';
                     popup.setContent(popupContent);
@@ -246,6 +245,12 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             body: JSON.stringify(data)
         });
+        if (response.ok) {
+            alert('Danke :-)! Bitte warte, bis deine Daten von einem Admin bestätigt werden.');
+        }
+        else {
+            alert("Fehler beim Abschicken der Daten :'/");
+        }
     }
 
 getPlaces(API_URL);

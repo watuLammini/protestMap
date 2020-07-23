@@ -43,6 +43,7 @@ async function initDB() {
         readAndInsertData('inputData/Black Lives Matter_Occupay Wallstreet.json');
         readAndInsertData('inputData/Senegal_Süd Afrika_Kongo.json');
         readAndInsertData('inputData/Svea.json');
+        readAndInsertData('inputData/protestlatinamerica.json');
     }
 }
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dbController = require('./dbController');
+const mapController = require('./mapController');
 const path = require('path');
 var favicon = require('serve-favicon');
 
@@ -20,6 +21,8 @@ app.use((error, req, res, next) => {
     console.log("An error occured %o", error);
     res.status(500).send("Sorry, something broke :/. See the console for more information.");
 });
+
+app.use('/map', mapController);
 
 app.use(express.static('public'));
 app.use('/api', dbController);

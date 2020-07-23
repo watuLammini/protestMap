@@ -78,6 +78,29 @@ CREATE TABLE IF NOT EXISTS movementLinkUnconfirmed (
 #         PRIMARY KEY (movementID, links)
 );
 
+# Views für das Kopieren
+CREATE SQL SECURITY INVOKER VIEW IF NOT EXISTS copyUnconfirmedMP AS
+SELECT mOld.id mIdOld,
+       mNew.id mIdNew,
+       mOld.name mName,
+       pOld.id pIdOld,
+       pNew.id pIdNew,
+       pOld.name pName
+FROM movementPlaceUnconfirmed
+         JOIN movementUnconfirmed mOld ON movementPlaceUnconfirmed.movementID = mOld.id
+         JOIN placeUnconfirmed pOld ON movementPlaceUnconfirmed.placeID = pOld.id
+         JOIN movement mNew ON mNew.name = mOld.name
+         JOIN place pNew ON pNew.name = pOld.name;
+
+CREATE SQL SECURITY INVOKER VIEW IF NOT EXISTS copyUnconfirmedML AS
+SELECT ml.movementID mIdOld,
+       mOld.name mName,
+       mNew.id mIdNew,
+       link
+FROM movementLinkUnconfirmed ml
+         JOIN movementUnconfirmed mOld ON ml.movementID = mOld.id
+         JOIN movement mNew ON mNew.name = mOld.name;
+
 # Beispieldaten einfügen
 
 INSERT INTO place (name, latitude, longitude) VALUES

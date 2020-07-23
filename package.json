@@ -19,6 +19,7 @@
     "d3": "^5.16.0",
     "dompurify": "^2.0.12",
     "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
     "jsdom": "^16.3.0",
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
