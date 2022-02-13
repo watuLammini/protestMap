@@ -14,7 +14,7 @@
   "author": "Ruben Lenz, Ali von Wedel",
   "license": "ISC",
   "dependencies": {
-    "ajv": "^6.12.2",
+    "ajv": "^6.12.3",
     "cors": "^2.8.5",
     "d3": "^5.16.0",
     "dompurify": "^2.0.12",
